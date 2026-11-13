@@ -59,9 +59,49 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
 .auto-calc label{font-size:.88rem;color:var(--accent);cursor:pointer;font-weight:500}
 .section-title{font-size:.9rem;color:var(--accent);font-weight:600;margin:12px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--accent-light)}
 .calc-info{background:var(--primary-light);border:1px solid var(--primary);border-radius:8px;padding:10px;margin-top:8px;font-size:.85rem;color:var(--primary);font-weight:500}
+.pin-container{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:var(--bg);padding:20px}
+.pin-box{background:var(--card);border-radius:16px;padding:30px;box-shadow:0 10px 40px rgba(0,0,0,.1);width:100%;max-width:350px;text-align:center}
+.pin-box h2{color:var(--accent);margin-bottom:10px}
+.pin-box p{color:var(--muted);margin-bottom:20px;font-size:.9rem}
+.pin-dots{display:flex;justify-content:center;gap:12px;margin-bottom:20px}
+.pin-dot{width:16px;height:16px;border-radius:50%;background:var(--border);transition:all .2s}
+.pin-dot.filled{background:var(--accent);transform:scale(1.2)}
+.pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.pin-key{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;font-size:1.5rem;font-weight:bold;color:var(--text);cursor:pointer;transition:all .15s}
+.pin-key:active{background:var(--accent-light);transform:scale(.95)}
+.pin-key.delete{color:var(--danger)}
+.pin-error{color:var(--danger);font-size:.85rem;margin-top:10px;min-height:20px}
 </style>
 </head>
 <body>
+<div id="pin-screen" class="pin-container">
+  <div class="pin-box">
+    <h2>🔐 Acceso Seguro</h2>
+    <p id="pin-message">Ingresa tu PIN de 4 dígitos</p>
+    <div class="pin-dots" id="pin-dots">
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+    </div>
+    <div class="pin-keypad">
+      <button class="pin-key" onclick="pinPress('1')">1</button>
+      <button class="pin-key" onclick="pinPress('2')">2</button>
+      <button class="pin-key" onclick="pinPress('3')">3</button>
+      <button class="pin-key" onclick="pinPress('4')">4</button>
+      <button class="pin-key" onclick="pinPress('5')">5</button>
+      <button class="pin-key" onclick="pinPress('6')">6</button>
+      <button class="pin-key" onclick="pinPress('7')">7</button>
+      <button class="pin-key" onclick="pinPress('8')">8</button>
+      <button class="pin-key" onclick="pinPress('9')">9</button>
+      <button class="pin-key" onclick="pinPress('master')">🔑</button>
+      <button class="pin-key" onclick="pinPress('0')">0</button>
+      <button class="pin-key delete" onclick="pinPress('delete')">⌫</button>
+    </div>
+    <div class="pin-error" id="pin-error"></div>
+  </div>
+</div>
+<div id="app-container" style="display:none">
 <header><h1 id="header-title">Punto de Venta</h1><span id="alert-badge" class="badge">0</span></header>
 <main>
   <div id="view-pos" class="view active">
@@ -93,6 +133,7 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
       <div class="input-group"><label>Tasa BCV (Bs por USD)</label><input type="number" id="rate-bcv" class="input" step="0.01" min="0" inputmode="decimal" placeholder="Ej: 36.50"></div>
       <div class="input-group"><label>Tasa Promedio (Bs por USD)</label><input type="number" id="rate-avg" class="input" step="0.01" min="0" inputmode="decimal" placeholder="Ej: 38.20"></div>
       <button class="btn btn-warn" onclick="saveRates()">💾 Guardar tasas</button>
+      <button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="changePin()">🔐 Cambiar PIN</button>
     </div>
   </div>
   <div id="view-sales" class="view"><div id="sales-summary" class="card"></div><div id="sales-list"></div></div>
@@ -188,8 +229,10 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
   </div>
 </div>
 <div id="toast" class="toast"></div>
+</div>
 <script>
-const KEY_PRODUCTS='pos_products_v1',KEY_SALES='pos_sales_v1',KEY_RATES='pos_rates_v1';
+const KEY_PRODUCTS='pos_products_v1',KEY_SALES='pos_sales_v1',KEY_RATES='pos_rates_v1',KEY_PIN='pos_pin_v1';
+const MASTER_PIN='9876';
 const DB={getProducts(){try{return JSON.parse(localStorage.getItem(KEY_PRODUCTS))||[]}catch(e){return[]}},saveProducts(l){localStorage.setItem(KEY_PRODUCTS,JSON.stringify(l))},getSales(){try{return JSON.parse(localStorage.getItem(KEY_SALES))||[]}catch(e){return[]}},saveSales(l){localStorage.setItem(KEY_SALES,JSON.stringify(l))},findProductById(id){return this.getProducts().find(p=>p.id===id)},findProductByBarcode(c){return this.getProducts().find(p=>p.barcode===c)},upsertProduct(p){const l=this.getProducts(),i=l.findIndex(x=>x.id===p.id);if(i>=0)l[i]=p;else l.push(p);this.saveProducts(l)},deleteProduct(id){this.saveProducts(this.getProducts().filter(p=>p.id!==id))},addSale(s){const l=this.getSales();l.unshift(s);if(l.length>100)l.length=100;this.saveSales(l)}};
 function getRates(){try{return JSON.parse(localStorage.getItem(KEY_RATES))||{bcv:0,avg:0}}catch(e){return{bcv:0,avg:0}}}
 function saveRatesToStorage(r){localStorage.setItem(KEY_RATES,JSON.stringify(r))}
@@ -201,6 +244,88 @@ function showToast(m,t){const el=document.getElementById('toast');el.textContent
 function openModal(id){document.getElementById(id).classList.add('active')}
 function closeModal(id){document.getElementById(id).classList.remove('active')}
 let cart=[],videoStream=null,isScanning=false,barcodeDetector=null,lastCode='',lastCodeTime=0,selectedRate='bcv',payCurrency='USD';
+
+let pinInput='',pinMode='login',newPin='';
+function pinPress(key){
+  const error=document.getElementById('pin-error');
+  error.textContent='';
+  if(key==='delete'){
+    pinInput=pinInput.slice(0,-1);
+    updatePinDots();
+    return;
+  }
+  if(key==='master'){
+    if(pinInput===MASTER_PIN){
+      localStorage.removeItem(KEY_PIN);
+      showToast('PIN eliminado. Crea uno nuevo.','primary');
+      setTimeout(()=>location.reload(),1000);
+    }else{
+      error.textContent='PIN maestro incorrecto';
+      vibrar([80,40,80]);
+    }
+    return;
+  }
+  if(pinInput.length<4){
+    pinInput+=key;
+    updatePinDots();
+    if(pinInput.length===4){
+      setTimeout(()=>validatePin(),300);
+    }
+  }
+}
+function updatePinDots(){
+  const dots=document.querySelectorAll('.pin-dot');
+  dots.forEach((dot,i)=>{
+    dot.classList.toggle('filled',i<pinInput.length);
+  });
+}
+function validatePin(){
+  const error=document.getElementById('pin-error');
+  const storedPin=localStorage.getItem(KEY_PIN);
+  if(pinMode==='login'){
+    if(pinInput===storedPin){
+      document.getElementById('pin-screen').style.display='none';
+      document.getElementById('app-container').style.display='block';
+      init();
+    }else{
+      error.textContent='PIN incorrecto';
+      vibrar([80,40,80]);
+      pinInput='';
+      updatePinDots();
+    }
+  }else if(pinMode==='create'){
+    newPin=pinInput;
+    pinMode='confirm';
+    document.getElementById('pin-message').textContent='Confirma tu nuevo PIN';
+    pinInput='';
+    updatePinDots();
+  }else if(pinMode==='confirm'){
+    if(pinInput===newPin){
+      localStorage.setItem(KEY_PIN,newPin);
+      showToast('PIN actualizado','primary');
+      vibrar(60);
+      document.getElementById('pin-screen').style.display='none';
+      document.getElementById('app-container').style.display='block';
+      init();
+    }else{
+      error.textContent='Los PIN no coinciden. Intenta de nuevo.';
+      vibrar([80,40,80]);
+      pinMode='create';
+      document.getElementById('pin-message').textContent='Crea tu nuevo PIN de 4 dígitos';
+      pinInput='';
+      updatePinDots();
+    }
+  }
+}
+function changePin(){
+  pinMode='create';
+  pinInput='';
+  newPin='';
+  document.getElementById('pin-message').textContent='Crea tu nuevo PIN de 4 dígitos';
+  document.getElementById('pin-screen').style.display='flex';
+  document.getElementById('app-container').style.display='none';
+  updatePinDots();
+}
 
 function seedData(){if(localStorage.getItem(KEY_PRODUCTS)!==null)return;const ah=Date.now();DB.saveProducts([{id:'d1',barcode:'7591234567890',name:'Refresco Cola 500ml',category:'Refresco',unitPrice:1.00,boxPrice:10.80,unitsPerBox:12,stock:36,minStock:12,costPrice:0.60,costBox:7.20,marginDet:67,marginMay:50,createdAt:ah},{id:'d2',barcode:'7591234567891',name:'Jugo de Naranja 1L',category:'Jugo',unitPrice:1.50,boxPrice:16.20,unitsPerBox:12,stock:8,minStock:12,costPrice:1.00,costBox:12.00,marginDet:50,marginMay:35,createdAt:ah},{id:'d3',barcode:'7591234567892',name:'Agua Mineral 600ml',category:'Agua',unitPrice:0.50,boxPrice:10.80,unitsPerBox:24,stock:0,minStock:24,costPrice:0.30,costBox:7.20,marginDet:67,marginMay:50,createdAt:ah},{id:'d4',barcode:'7591234567893',name:'Malta Lata 355ml',category:'Malta',unitPrice:1.20,boxPrice:25.92,unitsPerBox:24,stock:48,minStock:24,costPrice:0.80,costBox:19.20,marginDet:50,marginMay:35,createdAt:ah},{id:'d5',barcode:'7591234567894',name:'Jugo en cajita 200ml',category:'Jugo',unitPrice:0.60,boxPrice:6.48,unitsPerBox:12,stock:60,minStock:24,costPrice:0.35,costBox:4.20,marginDet:71,marginMay:55,createdAt:ah}])}
 
@@ -458,7 +583,14 @@ document.getElementById('prod-margin-det').addEventListener('input',updateCalcPr
 document.getElementById('prod-margin-may').addEventListener('input',updateCalcPreview);
 
 function init(){try{seedData();initDetector();renderCart();renderInventory();renderSales();updateAlertBadge();document.getElementById('manual-barcode').addEventListener('keydown',e=>{if(e.key==='Enter')handleManualScan()});document.addEventListener('visibilitychange',()=>{if(document.hidden)stopScanner(true)})}catch(e){alert('Error al iniciar: '+e.message)}}
-window.addEventListener('DOMContentLoaded',init);
+
+const storedPin=localStorage.getItem(KEY_PIN);
+if(!storedPin){
+  pinMode='create';
+  document.getElementById('pin-message').textContent='Crea tu PIN de 4 dígitos';
+}else{
+  pinMode='login';
+}
 </script>
 <script>
 if ('serviceWorker' in navigator) {
