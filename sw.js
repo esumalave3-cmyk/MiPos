@@ -1,10 +1,5 @@
-const CACHE_NAME = 'mipos-v2';
-const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon.svg'
-];
+const CACHE_NAME = 'mipos-v3-FINAL';
+const urlsToCache = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', function(event) {
   event.waitUntil(
@@ -12,6 +7,21 @@ self.addEventListener('install', function(event) {
       .then(function(cache) {
         return cache.addAll(urlsToCache);
       })
+      .then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', function(event) {
+  event.waitUntil(
+    caches.keys().then(function(cacheNames) {
+      return Promise.all(
+        cacheNames.filter(function(cacheName) {
+          return cacheName !== CACHE_NAME;
+        }).map(function(cacheName) {
+          return caches.delete(cacheName);
+        })
+      );
+    }).then(() => self.clients.claim())
   );
 });
 
@@ -24,5 +34,5 @@ self.addEventListener('fetch', function(event) {
         }
         return fetch(event.request);
       })
-    );
+  );
 });
