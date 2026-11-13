@@ -55,6 +55,7 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
 .auto-calc input{width:18px;height:18px}
 .auto-calc label{font-size:.88rem;color:var(--accent);cursor:pointer;font-weight:500}
 .section-title{font-size:.9rem;color:var(--accent);font-weight:600;margin:12px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--accent-light)}
+.calc-info{background:var(--primary-light);border:1px solid var(--primary);border-radius:8px;padding:10px;margin-top:8px;font-size:.85rem;color:var(--primary);font-weight:500}
 </style>
 </head>
 <body>
@@ -143,26 +144,32 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
     <div class="input-group"><label>Categoría</label><input type="text" id="prod-category" class="input" placeholder="Ej: Refresco"></div>
     <div class="auto-calc"><input type="checkbox" id="auto-calc-check" onchange="toggleAutoCalc()"><label for="auto-calc-check">✨ Calcular precios automáticamente desde costo + márgenes</label></div>
     <div id="cost-section" style="display:none">
-      <div class="section-title">💰 Costos y márgenes</div>
-      <div class="input-group"><label>Costo por unidad (USD)</label><input type="number" id="prod-cost" class="input" step="0.01" min="0" inputmode="decimal" placeholder="0.00"></div>
+      <div class="section-title">💰 Costo del proveedor</div>
+      <div class="input-group">
+        <label>💵 Costo de la caja/bulto (USD)</label>
+        <input type="number" id="prod-cost-box" class="input" step="0.01" min="0" inputmode="decimal" placeholder="Ej: 7.20">
+        <p class="muted small" style="margin-top:4px">Lo que le pagaste al proveedor por la caja completa</p>
+      </div>
+      <div class="input-group"><label>Unidades por caja</label><input type="number" id="prod-units-per-box" class="input" min="1" value="12" inputmode="numeric"></div>
+      <div class="calc-info" id="cost-unit-info">
+        📊 Costo unitario calculado: <strong>$<span id="calc-cost-unit">0.00</span></strong> (caja ÷ unidades)
+      </div>
+      <div class="section-title" style="margin-top:16px">📈 Márgenes de ganancia</div>
       <div class="flex-row">
         <div class="input-group"><label>Margen detall %</label><input type="number" id="prod-margin-det" class="input" step="1" min="0" inputmode="numeric" placeholder="30"></div>
         <div class="input-group"><label>Margen mayor %</label><input type="number" id="prod-margin-may" class="input" step="1" min="0" inputmode="numeric" placeholder="20"></div>
       </div>
       <div class="margin-box">
-        <div class="label">Precio calculado al detal:</div>
+        <div class="label">Precio calculado al detal (por unidad):</div>
         <div class="value currency-usd">$<span id="calc-preview-det">0.00</span></div>
       </div>
       <div class="margin-box" style="margin-top:8px">
-        <div class="label">Precio calculado por caja:</div>
+        <div class="label">Precio calculado por caja completa:</div>
         <div class="value currency-usd">$<span id="calc-preview-may">0.00</span></div>
       </div>
     </div>
     <div class="section-title">🏷️ Precios de venta</div>
-    <div class="flex-row">
-      <div class="input-group"><label>Precio venta unidad (USD)</label><input type="number" id="prod-unit-price" class="input" step="0.01" min="0" inputmode="decimal"></div>
-      <div class="input-group"><label>Unidades por caja</label><input type="number" id="prod-units-per-box" class="input" min="1" value="1" inputmode="numeric"></div>
-    </div>
+    <div class="input-group"><label>Precio venta unidad (USD)</label><input type="number" id="prod-unit-price" class="input" step="0.01" min="0" inputmode="decimal"></div>
     <div class="input-group"><label>Precio venta caja (USD)</label><input type="number" id="prod-box-price" class="input" step="0.01" min="0" inputmode="decimal"></div>
     <div class="section-title">📦 Inventario</div>
     <div class="flex-row">
@@ -200,7 +207,7 @@ function openModal(id){document.getElementById(id).classList.add('active')}
 function closeModal(id){document.getElementById(id).classList.remove('active')}
 let cart=[],videoStream=null,isScanning=false,barcodeDetector=null,lastCode='',lastCodeTime=0,selectedRate='bcv',payCurrency='USD';
 
-function seedData(){if(localStorage.getItem(KEY_PRODUCTS)!==null)return;const ah=Date.now();DB.saveProducts([{id:'d1',barcode:'7591234567890',name:'Refresco Cola 500ml',category:'Refresco',unitPrice:1.00,boxPrice:10.80,unitsPerBox:12,stock:36,minStock:12,costPrice:0.60,marginDet:67,marginMay:50,createdAt:ah},{id:'d2',barcode:'7591234567891',name:'Jugo de Naranja 1L',category:'Jugo',unitPrice:1.50,boxPrice:16.20,unitsPerBox:12,stock:8,minStock:12,costPrice:1.00,marginDet:50,marginMay:35,createdAt:ah},{id:'d3',barcode:'7591234567892',name:'Agua Mineral 600ml',category:'Agua',unitPrice:0.50,boxPrice:10.80,unitsPerBox:24,stock:0,minStock:24,costPrice:0.30,marginDet:67,marginMay:50,createdAt:ah},{id:'d4',barcode:'7591234567893',name:'Malta Lata 355ml',category:'Malta',unitPrice:1.20,boxPrice:25.92,unitsPerBox:24,stock:48,minStock:24,costPrice:0.80,marginDet:50,marginMay:35,createdAt:ah},{id:'d5',barcode:'7591234567894',name:'Jugo en cajita 200ml',category:'Jugo',unitPrice:0.60,boxPrice:6.48,unitsPerBox:12,stock:60,minStock:24,costPrice:0.35,marginDet:71,marginMay:55,createdAt:ah}])}
+function seedData(){if(localStorage.getItem(KEY_PRODUCTS)!==null)return;const ah=Date.now();DB.saveProducts([{id:'d1',barcode:'7591234567890',name:'Refresco Cola 500ml',category:'Refresco',unitPrice:1.00,boxPrice:10.80,unitsPerBox:12,stock:36,minStock:12,costPrice:0.60,costBox:7.20,marginDet:67,marginMay:50,createdAt:ah},{id:'d2',barcode:'7591234567891',name:'Jugo de Naranja 1L',category:'Jugo',unitPrice:1.50,boxPrice:16.20,unitsPerBox:12,stock:8,minStock:12,costPrice:1.00,costBox:12.00,marginDet:50,marginMay:35,createdAt:ah},{id:'d3',barcode:'7591234567892',name:'Agua Mineral 600ml',category:'Agua',unitPrice:0.50,boxPrice:10.80,unitsPerBox:24,stock:0,minStock:24,costPrice:0.30,costBox:7.20,marginDet:67,marginMay:50,createdAt:ah},{id:'d4',barcode:'7591234567893',name:'Malta Lata 355ml',category:'Malta',unitPrice:1.20,boxPrice:25.92,unitsPerBox:24,stock:48,minStock:24,costPrice:0.80,costBox:19.20,marginDet:50,marginMay:35,createdAt:ah},{id:'d5',barcode:'7591234567894',name:'Jugo en cajita 200ml',category:'Jugo',unitPrice:0.60,boxPrice:6.48,unitsPerBox:12,stock:60,minStock:24,costPrice:0.35,costBox:4.20,marginDet:71,marginMay:55,createdAt:ah}])}
 
 function switchView(vId){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.getElementById(vId).classList.add('active');const ord={'view-pos':0,'view-scan':1,'view-inventory':2,'view-sales':3};document.querySelectorAll('.nav-item')[ord[vId]].classList.add('active');const tit={'view-pos':'Punto de Venta','view-scan':'Escanear','view-inventory':'Inventario','view-sales':'Historial de Ventas'};document.getElementById('header-title').textContent=tit[vId];document.getElementById('total-bar').style.display=(vId==='view-pos')?'flex':'none';if(vId!=='view-scan')stopScanner(true);if(vId==='view-inventory'){renderInventory();loadRatesForm()}if(vId==='view-sales')renderSales();if(vId==='view-pos')renderCart()}
 
@@ -235,13 +242,21 @@ function toggleAutoCalc(){
   document.getElementById('cost-section').style.display=check?'block':'none';
   if(check)updateCalcPreview();
 }
+
 function updateCalcPreview(){
-  const cost=parseFloat(document.getElementById('prod-cost').value)||0;
+  const costBox=parseFloat(document.getElementById('prod-cost-box').value)||0;
+  const upb=parseInt(document.getElementById('prod-units-per-box').value,10)||1;
   const marginDet=parseFloat(document.getElementById('prod-margin-det').value)||0;
   const marginMay=parseFloat(document.getElementById('prod-margin-may').value)||0;
-  const upb=parseInt(document.getElementById('prod-units-per-box').value,10)||1;
-  const precioDet=cost*(1+marginDet/100);
-  const precioCaja=(cost*upb)*(1+marginMay/100);
+  
+  // Calcular costo unitario desde la caja
+  const costUnit=upb>0?(costBox/upb):0;
+  document.getElementById('calc-cost-unit').textContent=dinero(costUnit);
+  
+  // Calcular precios de venta
+  const precioDet=costUnit*(1+marginDet/100);
+  const precioCaja=costBox*(1+marginMay/100);
+  
   document.getElementById('calc-preview-det').textContent=dinero(precioDet);
   document.getElementById('calc-preview-may').textContent=dinero(precioCaja);
   document.getElementById('prod-unit-price').value=dinero(precioDet);
@@ -256,11 +271,11 @@ function openNewProductModal(bc){
   document.getElementById('prod-category').value='';
   document.getElementById('auto-calc-check').checked=false;
   toggleAutoCalc();
-  document.getElementById('prod-cost').value='';
+  document.getElementById('prod-cost-box').value='';
+  document.getElementById('prod-units-per-box').value='12';
   document.getElementById('prod-margin-det').value='';
   document.getElementById('prod-margin-may').value='';
   document.getElementById('prod-unit-price').value='';
-  document.getElementById('prod-units-per-box').value='12';
   document.getElementById('prod-box-price').value='';
   document.getElementById('prod-stock').value='0';
   document.getElementById('prod-min-stock').value='6';
@@ -278,11 +293,11 @@ function openEditProductModal(id){
   const hasCost=p.costPrice&&p.costPrice>0;
   document.getElementById('auto-calc-check').checked=hasCost;
   toggleAutoCalc();
-  document.getElementById('prod-cost').value=p.costPrice||'';
+  document.getElementById('prod-cost-box').value=p.costBox||'';
+  document.getElementById('prod-units-per-box').value=p.unitsPerBox;
   document.getElementById('prod-margin-det').value=p.marginDet||'';
   document.getElementById('prod-margin-may').value=p.marginMay||'';
   document.getElementById('prod-unit-price').value=p.unitPrice;
-  document.getElementById('prod-units-per-box').value=p.unitsPerBox;
   document.getElementById('prod-box-price').value=p.boxPrice;
   document.getElementById('prod-stock').value=p.stock;
   document.getElementById('prod-min-stock').value=p.minStock;
@@ -299,21 +314,25 @@ function saveProduct(){
     const nm=document.getElementById('prod-name').value.trim();
     const upb=parseInt(document.getElementById('prod-units-per-box').value,10);
     const useAutoCalc=document.getElementById('auto-calc-check').checked;
-    const costPrice=parseFloat(document.getElementById('prod-cost').value)||0;
+    const costBox=parseFloat(document.getElementById('prod-cost-box').value)||0;
     const marginDet=parseFloat(document.getElementById('prod-margin-det').value)||0;
     const marginMay=parseFloat(document.getElementById('prod-margin-may').value)||0;
     let unitPrice=parseFloat(document.getElementById('prod-unit-price').value)||0;
     let boxPrice=parseFloat(document.getElementById('prod-box-price').value)||0;
-    if(useAutoCalc&&costPrice>0){
-      unitPrice=costPrice*(1+marginDet/100);
-      boxPrice=(costPrice*upb)*(1+marginMay/100);
+    
+    if(useAutoCalc&&costBox>0&&upb>0){
+      const costUnit=costBox/upb;
+      unitPrice=costUnit*(1+marginDet/100);
+      boxPrice=costBox*(1+marginMay/100);
     }
+    
     if(!nm){showToast('Escribe el nombre','danger');return}
     if(!bc){showToast('Escribe el código','danger');return}
     if(!Number.isInteger(upb)||upb<1){showToast('Unidades por caja debe ser 1 o más','danger');return}
     const dup=DB.getProducts().find(p=>p.barcode===bc&&p.id!==id);
     if(dup){showToast('Ese código ya lo usa: '+dup.name,'danger');vibrar([80,40,80]);return}
-    const prod={id:id||uid('p_'),barcode:bc,name:nm,category:document.getElementById('prod-category').value.trim(),unitPrice:Math.max(0,unitPrice),boxPrice:Math.max(0,boxPrice),unitsPerBox:upb,stock:Math.max(0,parseInt(document.getElementById('prod-stock').value,10)||0),minStock:Math.max(0,parseInt(document.getElementById('prod-min-stock').value,10)||0),costPrice:costPrice,marginDet:marginDet,marginMay:marginMay,createdAt:ant?ant.createdAt:Date.now()};
+    const costUnit=upb>0?(costBox/upb):0;
+    const prod={id:id||uid('p_'),barcode:bc,name:nm,category:document.getElementById('prod-category').value.trim(),unitPrice:Math.max(0,unitPrice),boxPrice:Math.max(0,boxPrice),unitsPerBox:upb,stock:Math.max(0,parseInt(document.getElementById('prod-stock').value,10)||0),minStock:Math.max(0,parseInt(document.getElementById('prod-min-stock').value,10)||0),costPrice:costUnit,costBox:costBox,marginDet:marginDet,marginMay:marginMay,createdAt:ant?ant.createdAt:Date.now()};
     DB.upsertProduct(prod);
     closeModal('product-modal');
     renderInventory();
@@ -446,13 +465,13 @@ async function scanFrame(){if(!isScanning||!videoStream)return;const vid=documen
 function handleScannedCode(code){const lim=String(code||'').trim();if(!lim)return;const p=DB.findProductByBarcode(lim);if(p){if(addToCart(p.id,1,false)){showToast('Agregado: '+p.name,'primary');switchView('view-pos')}}else{showToast('Código nuevo: regístralo','warn');vibrar([80,40,80]);stopScanner(true);switchView('view-inventory');openNewProductModal(lim)}}
 function handleManualScan(){const inp=document.getElementById('manual-barcode');const code=inp.value.trim();if(!code){showToast('Escribe un código','warn');return}handleScannedCode(code);inp.value=''}
 
-function exportBackup(){try{const data={app:'micro-pos',version:4,exportDate:new Date().toISOString(),products:DB.getProducts(),sales:DB.getSales(),rates:getRates()};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='respaldo_pos_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('Respaldo descargado','primary');vibrar(60)}catch(e){showToast('Error: '+e.message,'danger')}}
+function exportBackup(){try{const data={app:'micro-pos',version:5,exportDate:new Date().toISOString(),products:DB.getProducts(),sales:DB.getSales(),rates:getRates()};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='respaldo_pos_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('Respaldo descargado','primary');vibrar(60)}catch(e){showToast('Error: '+e.message,'danger')}}
 function importBackup(ev){const file=ev.target.files&&ev.target.files[0];if(!file)return;if(!confirm('Esto REEMPLAZA tu inventario, ventas y tasas. ¿Continuar?')){ev.target.value='';return}const reader=new FileReader();reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(!data||!Array.isArray(data.products))throw new Error('Archivo inválido');localStorage.setItem(KEY_PRODUCTS,JSON.stringify(data.products));localStorage.setItem(KEY_SALES,JSON.stringify(Array.isArray(data.sales)?data.sales:[]));if(data.rates)saveRatesToStorage(data.rates);cart=[];showToast('Datos restaurados','primary');vibrar([60,40,60]);setTimeout(()=>location.reload(),900)}catch(err){showToast('Error: '+err.message,'danger');vibrar([80,40,80])}};reader.onerror=()=>showToast('No se pudo leer','danger');reader.readAsText(file);ev.target.value=''}
 
-document.getElementById('prod-cost').addEventListener('input',updateCalcPreview);
+document.getElementById('prod-cost-box').addEventListener('input',updateCalcPreview);
+document.getElementById('prod-units-per-box').addEventListener('input',updateCalcPreview);
 document.getElementById('prod-margin-det').addEventListener('input',updateCalcPreview);
 document.getElementById('prod-margin-may').addEventListener('input',updateCalcPreview);
-document.getElementById('prod-units-per-box').addEventListener('input',updateCalcPreview);
 
 function init(){try{seedData();initDetector();renderCart();renderInventory();renderSales();updateAlertBadge();document.getElementById('manual-barcode').addEventListener('keydown',e=>{if(e.key==='Enter')handleManualScan()});document.addEventListener('visibilitychange',()=>{if(document.hidden)stopScanner(true)})}catch(e){alert('Error al iniciar: '+e.message)}}
 window.addEventListener('DOMContentLoaded',init);
