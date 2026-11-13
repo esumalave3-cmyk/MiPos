@@ -3,52 +3,58 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0d1117">
+<meta name="theme-color" content="#3182ce">
 <title>Mi POS - Bebidas y Jugos</title>
 <style>
-:root{--bg:#0d1117;--card:#161b22;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--primary:#2ea043;--danger:#f85149;--warn:#d29922;--accent:#1f6feb;--safe-bottom:env(safe-area-inset-bottom,0px)}
+:root{--bg:#f5f7fa;--card:#ffffff;--border:#e2e8f0;--text:#1a202c;--muted:#718096;--primary:#38a169;--primary-light:#c6f6d5;--danger:#e53e3e;--danger-light:#fed7d7;--warn:#d69e2e;--warn-light:#fefcbf;--accent:#3182ce;--accent-light:#bee3f8;--shadow:0 2px 8px rgba(0,0,0,.08);--safe-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
-header{background:var(--card);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
-header h1{font-size:1.1rem;font-weight:600}
+header{background:var(--card);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+header h1{font-size:1.15rem;font-weight:700;color:var(--accent)}
 .badge{background:var(--danger);color:#fff;font-size:.75rem;padding:4px 10px;border-radius:12px;font-weight:bold;display:none}
 .badge.active{display:inline-block}
 main{flex:1;overflow-y:auto;padding:16px;padding-bottom:150px}
 .view{display:none}.view.active{display:block}
-.card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px}
-.btn{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:12px 14px;font-size:1rem;font-weight:600;cursor:pointer;min-height:44px;width:100%;display:flex;align-items:center;justify-content:center;gap:6px}
-.btn:disabled{opacity:.45}.btn-primary{background:var(--primary)}.btn-danger{background:var(--danger)}.btn-warn{background:var(--warn);color:#000}.btn-ghost{background:var(--bg);border:1px solid var(--border);color:var(--text)}.btn-sm{padding:10px 12px;font-size:.88rem;min-height:40px;width:auto}
-.input-group{margin-bottom:12px}.input-group label{display:block;color:var(--muted);font-size:.85rem;margin-bottom:4px}
-.input{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:12px;border-radius:6px;font-size:1rem;min-height:44px}
-.input:focus{outline:2px solid var(--accent);border-color:transparent}
-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding-bottom:var(--safe-bottom);z-index:110}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0;color:var(--muted);font-size:.72rem;cursor:pointer;min-height:56px}
-.nav-item.active{color:var(--accent)}.nav-item span{font-size:1.4rem;margin-bottom:2px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow)}
+.btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:12px 14px;font-size:1rem;font-weight:600;cursor:pointer;min-height:44px;width:100%;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
+.btn:active{transform:scale(.97)}.btn:disabled{opacity:.45}
+.btn-primary{background:var(--primary)}.btn-danger{background:var(--danger)}.btn-warn{background:var(--warn);color:#1a202c}.btn-ghost{background:var(--bg);border:1px solid var(--border);color:var(--text)}.btn-sm{padding:10px 12px;font-size:.88rem;min-height:40px;width:auto}
+.input-group{margin-bottom:12px}.input-group label{display:block;color:var(--muted);font-size:.85rem;margin-bottom:4px;font-weight:500}
+.input{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:12px;border-radius:8px;font-size:1rem;min-height:44px}
+.input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)}
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding-bottom:var(--safe-bottom);z-index:110;box-shadow:0 -2px 8px rgba(0,0,0,.06)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0;color:var(--muted);font-size:.72rem;cursor:pointer;min-height:56px;transition:all .15s}
+.nav-item.active{color:var(--accent);font-weight:600}.nav-item span{font-size:1.4rem;margin-bottom:2px}
 .cart-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}.cart-item:last-child{border-bottom:none}
-.cart-controls{display:flex;align-items:center;gap:6px}.cart-controls button{width:40px;height:40px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:1.3rem}
-.total-bar{position:fixed;bottom:57px;left:0;right:0;background:var(--card);border-top:1px solid var(--border);padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:1.15rem;font-weight:bold;z-index:105}
-#scanner-container{position:relative;width:100%;aspect-ratio:1;background:#000;border-radius:8px;overflow:hidden}
+.cart-controls{display:flex;align-items:center;gap:6px}.cart-controls button{width:40px;height:40px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:1.3rem;font-weight:bold}
+.total-bar{position:fixed;bottom:57px;left:0;right:0;background:var(--card);border-top:1px solid var(--border);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:bold;z-index:105;box-shadow:0 -2px 8px rgba(0,0,0,.06)}
+.total-usd{color:var(--text);font-size:1.2rem}.total-bs{color:var(--warn);font-size:.95rem;font-weight:600}
+#scanner-container{position:relative;width:100%;aspect-ratio:1;background:#1a202c;border-radius:10px;overflow:hidden}
 #scanner-video{width:100%;height:100%;object-fit:cover}.scanner-frame{position:absolute;top:15%;left:10%;right:10%;bottom:15%;border:3px solid var(--primary);border-radius:8px;pointer-events:none}
 .scanner-status{text-align:center;padding:10px;color:var(--muted);font-size:.9rem}
 .stock-pill{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:bold;white-space:nowrap}
-.pill-ok{background:var(--primary);color:#fff}.pill-warn{background:var(--warn);color:#000}.pill-danger{background:var(--danger);color:#fff}
+.pill-ok{background:var(--primary-light);color:var(--primary)}.pill-warn{background:var(--warn-light);color:#975a16}.pill-danger{background:var(--danger-light);color:var(--danger)}
 .product-card{border-left:5px solid var(--border)}.product-card.edge-ok{border-left-color:var(--primary)}.product-card.edge-warn{border-left-color:var(--warn)}.product-card.edge-danger{border-left-color:var(--danger)}
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:200;padding:16px}.modal-overlay.active{display:flex}
-.modal-content{background:var(--card);border:1px solid var(--border);border-radius:12px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;padding:16px}
-.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.modal-header h2{font-size:1.15rem}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(26,32,44,.7);display:none;align-items:center;justify-content:center;z-index:200;padding:16px;backdrop-filter:blur(4px)}.modal-overlay.active{display:flex}
+.modal-content{background:var(--card);border:1px solid var(--border);border-radius:12px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;padding:16px;box-shadow:0 10px 40px rgba(0,0,0,.2)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.modal-header h2{font-size:1.15rem;color:var(--accent)}
 .modal-close{background:none;border:none;color:var(--muted);font-size:2rem;line-height:1;cursor:pointer;padding:0 6px}
-.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);color:var(--text);padding:12px 20px;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.6);z-index:300;opacity:0;transition:opacity .3s;pointer-events:none;font-weight:600;max-width:90%;text-align:center}
-.toast.show{opacity:1}.toast.primary{border-color:var(--primary);color:var(--primary)}.toast.danger{border-color:var(--danger);color:var(--danger)}.toast.warn{border-color:var(--warn);color:var(--warn)}
-.flex-row{display:flex;gap:8px}.flex-row>*{flex:1}.muted{color:var(--muted)}.small{font-size:.85rem}.empty-msg{color:var(--muted);text-align:center;padding:30px 16px}.change-neg{color:var(--danger)}.change-pos{color:var(--primary)}.backup-card{border:1px dashed var(--accent)}.config-card{border:1px dashed var(--warn);background:rgba(210,153,34,.05)}
-.rate-option{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:6px;margin-bottom:8px;cursor:pointer}
-.rate-option.selected{border-color:var(--primary);background:rgba(46,160,67,.1)}
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);color:var(--text);padding:12px 20px;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.15);z-index:300;opacity:0;transition:opacity .3s;pointer-events:none;font-weight:600;max-width:90%;text-align:center}
+.toast.show{opacity:1}.toast.primary{border-color:var(--primary);color:var(--primary)}.toast.danger{border-color:var(--danger);color:var(--danger)}.toast.warn{border-color:var(--warn);color:#975a16}
+.flex-row{display:flex;gap:8px}.flex-row>*{flex:1}.muted{color:var(--muted)}.small{font-size:.85rem}.empty-msg{color:var(--muted);text-align:center;padding:30px 16px}.change-neg{color:var(--danger)}.change-pos{color:var(--primary)}.backup-card{border:1px dashed var(--accent);background:var(--accent-light)}.config-card{border:1px dashed var(--warn);background:var(--warn-light)}
+.rate-option{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;cursor:pointer;background:var(--card)}
+.rate-option.selected{border-color:var(--primary);background:var(--primary-light)}
 .rate-option input{width:20px;height:20px}
-.rate-display{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
-.rate-display:last-child{border-bottom:none}
-.rate-display .label{color:var(--muted)}
-.rate-display .value{font-weight:bold}
-.currency-bs{color:#f0b90b}
-.currency-usd{color:var(--primary)}
+.rate-display{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}.rate-display:last-child{border-bottom:none}
+.rate-display .label{color:var(--muted)}.rate-display .value{font-weight:bold}
+.currency-bs{color:var(--warn);font-weight:600}.currency-usd{color:var(--primary);font-weight:600}
+.margin-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin-top:8px}
+.margin-box .label{font-size:.8rem;color:var(--muted)}
+.margin-box .value{font-size:1rem;font-weight:bold;color:var(--primary)}
+.auto-calc{display:flex;align-items:center;gap:8px;padding:10px;background:var(--accent-light);border-radius:8px;margin-bottom:12px;border:1px solid var(--accent)}
+.auto-calc input{width:18px;height:18px}
+.auto-calc label{font-size:.88rem;color:var(--accent);cursor:pointer;font-weight:500}
+.section-title{font-size:.9rem;color:var(--accent);font-weight:600;margin:12px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--accent-light)}
 </style>
 </head>
 <body>
@@ -80,20 +86,20 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
     <div class="card config-card" style="margin-top:12px">
       <h3 style="margin-bottom:6px">⚙️ Configuración de tasas</h3>
       <p class="muted small" style="margin-bottom:12px">Actualiza las tasas del día. Los precios de tus productos están en USD.</p>
-      <div class="input-group">
-        <label>Tasa BCV (Bs por USD)</label>
-        <input type="number" id="rate-bcv" class="input" step="0.01" min="0" inputmode="decimal" placeholder="Ej: 36.50">
-      </div>
-      <div class="input-group">
-        <label>Tasa Promedio (Bs por USD)</label>
-        <input type="number" id="rate-avg" class="input" step="0.01" min="0" inputmode="decimal" placeholder="Ej: 38.20">
-      </div>
+      <div class="input-group"><label>Tasa BCV (Bs por USD)</label><input type="number" id="rate-bcv" class="input" step="0.01" min="0" inputmode="decimal" placeholder="Ej: 36.50"></div>
+      <div class="input-group"><label>Tasa Promedio (Bs por USD)</label><input type="number" id="rate-avg" class="input" step="0.01" min="0" inputmode="decimal" placeholder="Ej: 38.20"></div>
       <button class="btn btn-warn" onclick="saveRates()">💾 Guardar tasas</button>
     </div>
   </div>
   <div id="view-sales" class="view"><div id="sales-summary" class="card"></div><div id="sales-list"></div></div>
 </main>
-<div class="total-bar" id="total-bar"><span>$<span id="cart-total">0.00</span></span><button class="btn btn-primary btn-sm" id="btn-checkout" onclick="openCheckoutModal()" disabled>💵 Cobrar</button></div>
+<div class="total-bar" id="total-bar">
+  <div style="display:flex;flex-direction:column;gap:2px">
+    <span class="total-usd">$<span id="cart-total">0.00</span></span>
+    <span class="total-bs">Bs <span id="cart-total-bs">0.00</span></span>
+  </div>
+  <button class="btn btn-primary btn-sm" id="btn-checkout" onclick="openCheckoutModal()" disabled>💵 Cobrar</button>
+</div>
 <nav>
   <div class="nav-item active" onclick="switchView('view-pos')"><span>🛒</span>POS</div>
   <div class="nav-item" onclick="switchView('view-scan')"><span>📷</span>Escanear</div>
@@ -110,14 +116,8 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
     </div>
     <div class="input-group">
       <label>Seleccionar tasa para cobrar</label>
-      <div class="rate-option selected" onclick="selectRate('bcv')" id="rate-opt-bcv">
-        <input type="radio" name="rate" value="bcv" checked>
-        <div style="flex:1"><strong>Tasa BCV</strong><div class="muted small" id="rate-bcv-display">0.00 Bs/$</div></div>
-      </div>
-      <div class="rate-option" onclick="selectRate('avg')" id="rate-opt-avg">
-        <input type="radio" name="rate" value="avg">
-        <div style="flex:1"><strong>Tasa Promedio</strong><div class="muted small" id="rate-avg-display">0.00 Bs/$</div></div>
-      </div>
+      <div class="rate-option selected" onclick="selectRate('bcv')" id="rate-opt-bcv"><input type="radio" name="rate" value="bcv" checked><div style="flex:1"><strong>Tasa BCV</strong><div class="muted small" id="rate-bcv-display">0.00 Bs/$</div></div></div>
+      <div class="rate-option" onclick="selectRate('avg')" id="rate-opt-avg"><input type="radio" name="rate" value="avg"><div style="flex:1"><strong>Tasa Promedio</strong><div class="muted small" id="rate-avg-display">0.00 Bs/$</div></div></div>
     </div>
     <div class="input-group">
       <label>Moneda del pago</label>
@@ -126,10 +126,7 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
         <button class="btn btn-sm btn-ghost" id="pay-bs" onclick="setPayCurrency('BS')">Bs</button>
       </div>
     </div>
-    <div class="input-group">
-      <label id="cash-label">Efectivo recibido (USD)</label>
-      <input type="number" id="cash-received" class="input" placeholder="0.00" step="0.01" min="0" inputmode="decimal" oninput="calculateChange()" style="font-size:1.4rem;text-align:center">
-    </div>
+    <div class="input-group"><label id="cash-label">Efectivo recibido (USD)</label><input type="number" id="cash-received" class="input" placeholder="0.00" step="0.01" min="0" inputmode="decimal" oninput="calculateChange()" style="font-size:1.4rem;text-align:center"></div>
     <div class="card" style="text-align:center;font-size:1.2rem">
       <div class="rate-display"><span class="label">Cambio en USD:</span><strong id="change-usd" class="change-pos">$0.00</strong></div>
       <div class="rate-display"><span class="label">Cambio en Bs:</span><strong id="change-bs" class="change-pos currency-bs">Bs 0.00</strong></div>
@@ -144,11 +141,30 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
     <div class="input-group"><label>Código de barras</label><input type="text" id="prod-barcode" class="input" inputmode="numeric"></div>
     <div class="input-group"><label>Nombre del producto</label><input type="text" id="prod-name" class="input" placeholder="Ej: Pepsi 500ml"></div>
     <div class="input-group"><label>Categoría</label><input type="text" id="prod-category" class="input" placeholder="Ej: Refresco"></div>
+    <div class="auto-calc"><input type="checkbox" id="auto-calc-check" onchange="toggleAutoCalc()"><label for="auto-calc-check">✨ Calcular precios automáticamente desde costo + márgenes</label></div>
+    <div id="cost-section" style="display:none">
+      <div class="section-title">💰 Costos y márgenes</div>
+      <div class="input-group"><label>Costo por unidad (USD)</label><input type="number" id="prod-cost" class="input" step="0.01" min="0" inputmode="decimal" placeholder="0.00"></div>
+      <div class="flex-row">
+        <div class="input-group"><label>Margen detall %</label><input type="number" id="prod-margin-det" class="input" step="1" min="0" inputmode="numeric" placeholder="30"></div>
+        <div class="input-group"><label>Margen mayor %</label><input type="number" id="prod-margin-may" class="input" step="1" min="0" inputmode="numeric" placeholder="20"></div>
+      </div>
+      <div class="margin-box">
+        <div class="label">Precio calculado al detal:</div>
+        <div class="value currency-usd">$<span id="calc-preview-det">0.00</span></div>
+      </div>
+      <div class="margin-box" style="margin-top:8px">
+        <div class="label">Precio calculado por caja:</div>
+        <div class="value currency-usd">$<span id="calc-preview-may">0.00</span></div>
+      </div>
+    </div>
+    <div class="section-title">🏷️ Precios de venta</div>
     <div class="flex-row">
-      <div class="input-group"><label>Precio por unidad (USD)</label><input type="number" id="prod-unit-price" class="input" step="0.01" min="0" inputmode="decimal"></div>
+      <div class="input-group"><label>Precio venta unidad (USD)</label><input type="number" id="prod-unit-price" class="input" step="0.01" min="0" inputmode="decimal"></div>
       <div class="input-group"><label>Unidades por caja</label><input type="number" id="prod-units-per-box" class="input" min="1" value="1" inputmode="numeric"></div>
     </div>
-    <div class="input-group"><label>Precio por caja (USD)</label><input type="number" id="prod-box-price" class="input" step="0.01" min="0" inputmode="decimal"></div>
+    <div class="input-group"><label>Precio venta caja (USD)</label><input type="number" id="prod-box-price" class="input" step="0.01" min="0" inputmode="decimal"></div>
+    <div class="section-title">📦 Inventario</div>
     <div class="flex-row">
       <div class="input-group"><label>Stock (unidades)</label><input type="number" id="prod-stock" class="input" min="0" value="0" inputmode="numeric"></div>
       <div class="input-group"><label>Avisar cuando baje de</label><input type="number" id="prod-min-stock" class="input" min="0" value="6" inputmode="numeric"></div>
@@ -183,33 +199,244 @@ function showToast(m,t){const el=document.getElementById('toast');el.textContent
 function openModal(id){document.getElementById(id).classList.add('active')}
 function closeModal(id){document.getElementById(id).classList.remove('active')}
 let cart=[],videoStream=null,isScanning=false,barcodeDetector=null,lastCode='',lastCodeTime=0,selectedRate='bcv',payCurrency='USD';
-function seedData(){if(localStorage.getItem(KEY_PRODUCTS)!==null)return;const ah=Date.now();DB.saveProducts([{id:'d1',barcode:'7591234567890',name:'Refresco Cola 500ml',category:'Refresco',unitPrice:1.00,boxPrice:10.80,unitsPerBox:12,stock:36,minStock:12,createdAt:ah},{id:'d2',barcode:'7591234567891',name:'Jugo de Naranja 1L',category:'Jugo',unitPrice:1.50,boxPrice:16.20,unitsPerBox:12,stock:8,minStock:12,createdAt:ah},{id:'d3',barcode:'7591234567892',name:'Agua Mineral 600ml',category:'Agua',unitPrice:0.50,boxPrice:10.80,unitsPerBox:24,stock:0,minStock:24,createdAt:ah},{id:'d4',barcode:'7591234567893',name:'Malta Lata 355ml',category:'Malta',unitPrice:1.20,boxPrice:25.92,unitsPerBox:24,stock:48,minStock:24,createdAt:ah},{id:'d5',barcode:'7591234567894',name:'Jugo en cajita 200ml',category:'Jugo',unitPrice:0.60,boxPrice:6.48,unitsPerBox:12,stock:60,minStock:24,createdAt:ah}])}
+
+function seedData(){if(localStorage.getItem(KEY_PRODUCTS)!==null)return;const ah=Date.now();DB.saveProducts([{id:'d1',barcode:'7591234567890',name:'Refresco Cola 500ml',category:'Refresco',unitPrice:1.00,boxPrice:10.80,unitsPerBox:12,stock:36,minStock:12,costPrice:0.60,marginDet:67,marginMay:50,createdAt:ah},{id:'d2',barcode:'7591234567891',name:'Jugo de Naranja 1L',category:'Jugo',unitPrice:1.50,boxPrice:16.20,unitsPerBox:12,stock:8,minStock:12,costPrice:1.00,marginDet:50,marginMay:35,createdAt:ah},{id:'d3',barcode:'7591234567892',name:'Agua Mineral 600ml',category:'Agua',unitPrice:0.50,boxPrice:10.80,unitsPerBox:24,stock:0,minStock:24,costPrice:0.30,marginDet:67,marginMay:50,createdAt:ah},{id:'d4',barcode:'7591234567893',name:'Malta Lata 355ml',category:'Malta',unitPrice:1.20,boxPrice:25.92,unitsPerBox:24,stock:48,minStock:24,costPrice:0.80,marginDet:50,marginMay:35,createdAt:ah},{id:'d5',barcode:'7591234567894',name:'Jugo en cajita 200ml',category:'Jugo',unitPrice:0.60,boxPrice:6.48,unitsPerBox:12,stock:60,minStock:24,costPrice:0.35,marginDet:71,marginMay:55,createdAt:ah}])}
+
 function switchView(vId){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.getElementById(vId).classList.add('active');const ord={'view-pos':0,'view-scan':1,'view-inventory':2,'view-sales':3};document.querySelectorAll('.nav-item')[ord[vId]].classList.add('active');const tit={'view-pos':'Punto de Venta','view-scan':'Escanear','view-inventory':'Inventario','view-sales':'Historial de Ventas'};document.getElementById('header-title').textContent=tit[vId];document.getElementById('total-bar').style.display=(vId==='view-pos')?'flex':'none';if(vId!=='view-scan')stopScanner(true);if(vId==='view-inventory'){renderInventory();loadRatesForm()}if(vId==='view-sales')renderSales();if(vId==='view-pos')renderCart()}
+
 function estadoStock(p){if(p.stock===0)return{pill:'pill-danger',edge:'edge-danger'};if(p.stock<=p.minStock)return{pill:'pill-warn',edge:'edge-warn'};return{pill:'pill-ok',edge:'edge-ok'}}
-function renderInventory(){const f=document.getElementById('inventory-search').value.toLowerCase().trim();const prods=DB.getProducts().filter(p=>p.name.toLowerCase().includes(f)||String(p.barcode).includes(f)).sort((a,b)=>a.name.localeCompare(b.name));const cont=document.getElementById('inventory-list');if(prods.length===0){cont.innerHTML='<div class="card"><p class="empty-msg">No hay productos. Toca "+ Nuevo Producto".</p></div>';updateAlertBadge();return}const rates=getRates();cont.innerHTML=prods.map(p=>{const est=estadoStock(p);const btnCaja=p.unitsPerBox>1?'<button class="btn btn-sm btn-ghost" onclick="sellFromInventory(\''+p.id+'\',true)">📦 Caja</button>':'';const precioBsBCV=dinero(p.unitPrice*rates.bcv);const precioBsAvg=dinero(p.unitPrice*rates.avg);return'<div class="card product-card '+est.edge+'"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><strong>'+textoSeguro(p.name)+'</strong><div class="muted small">'+textoSeguro(p.barcode)+' · '+textoSeguro(p.category||'Sin categoría')+'</div><div class="small" style="margin-top:4px">$'+dinero(p.unitPrice)+' · <span class="currency-bs">Bs '+precioBsBCV+' (BCV)</span></div><div class="small muted">Caja $'+dinero(p.boxPrice)+' ('+p.unitsPerBox+' u) · <span class="currency-bs">Bs '+precioBsAvg+' (Prom)</span></div></div><span class="stock-pill '+est.pill+'">'+p.stock+' u</span></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"><button class="btn btn-sm btn-primary" onclick="sellFromInventory(\''+p.id+'\',false)">🛒 Unidad</button>'+btnCaja+'<button class="btn btn-sm btn-warn" onclick="openReceiveStockModal(\''+p.id+'\')">📥 Recibir</button><button class="btn btn-sm btn-ghost" onclick="openEditProductModal(\''+p.id+'\')">✏️ Editar</button></div></div>'}).join('');updateAlertBadge()}
+
+function renderInventory(){
+  const f=document.getElementById('inventory-search').value.toLowerCase().trim();
+  const prods=DB.getProducts().filter(p=>p.name.toLowerCase().includes(f)||String(p.barcode).includes(f)).sort((a,b)=>a.name.localeCompare(b.name));
+  const cont=document.getElementById('inventory-list');
+  if(prods.length===0){cont.innerHTML='<div class="card"><p class="empty-msg">No hay productos. Toca "+ Nuevo Producto".</p></div>';updateAlertBadge();return}
+  const rates=getRates();
+  cont.innerHTML=prods.map(p=>{
+    const est=estadoStock(p);
+    const btnCaja=p.unitsPerBox>1?'<button class="btn btn-sm btn-ghost" onclick="sellFromInventory(\''+p.id+'\',true)">📦 Caja</button>':'';
+    const precioBsBCV=dinero(p.unitPrice*rates.bcv);
+    const precioBsAvg=dinero(p.unitPrice*rates.avg);
+    const ganDet=p.unitPrice-(p.costPrice||0);
+    const ganMay=(p.boxPrice/p.unitsPerBox)-(p.costPrice||0);
+    const margenTxt=p.costPrice?'<div style="margin-top:6px"><div class="small"><span style="color:var(--primary);font-weight:600">Detal:</span> costo $'+dinero(p.costPrice)+' + '+((p.marginDet||0))+'% = $'+dinero(p.unitPrice)+' (ganancia $'+dinero(ganDet)+')</div><div class="small"><span style="color:var(--accent);font-weight:600">Mayor:</span> caja $'+dinero(p.boxPrice)+' / '+p.unitsPerBox+'u + '+((p.marginMay||0))+'% = ganancia $'+dinero(ganMay)+' por unidad</div></div>':'';
+    return'<div class="card product-card '+est.edge+'"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><strong>'+textoSeguro(p.name)+'</strong><div class="muted small">'+textoSeguro(p.barcode)+' · '+textoSeguro(p.category||'Sin categoría')+'</div><div class="small" style="margin-top:4px">Unidad <strong class="currency-usd">$'+dinero(p.unitPrice)+'</strong> · <span class="currency-bs">Bs '+precioBsBCV+' (BCV)</span></div><div class="small muted">Caja <strong>$'+dinero(p.boxPrice)+'</strong> ('+p.unitsPerBox+' u) · <span class="currency-bs">Bs '+precioBsAvg+' (Prom)</span></div>'+margenTxt+'</div><span class="stock-pill '+est.pill+'">'+p.stock+' u</span></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"><button class="btn btn-sm btn-primary" onclick="sellFromInventory(\''+p.id+'\',false)">🛒 Unidad</button>'+btnCaja+'<button class="btn btn-sm btn-warn" onclick="openReceiveStockModal(\''+p.id+'\')">📥 Recibir</button><button class="btn btn-sm btn-ghost" onclick="openEditProductModal(\''+p.id+'\')">✏️ Editar</button></div></div>'
+  }).join('');
+  updateAlertBadge();
+}
+
 function updateAlertBadge(){const n=DB.getProducts().filter(p=>p.stock<=p.minStock).length;const b=document.getElementById('alert-badge');b.textContent=n+(n===1?' alerta':' alertas');b.classList.toggle('active',n>0)}
+
 function loadRatesForm(){const r=getRates();document.getElementById('rate-bcv').value=r.bcv||'';document.getElementById('rate-avg').value=r.avg||''}
-function saveRates(){const bcv=parseFloat(document.getElementById('rate-bcv').value)||0;const avg=parseFloat(document.getElementById('rate-avg').value)||0;if(bcv<=0&&avg<=0){showToast('Ingresa al menos una tasa','danger');return}saveRatesToStorage({bcv:bcv,avg:avg});showToast('Tasas guardadas: BCV='+dinero(bcv)+', Prom='+dinero(avg),'primary');vibrar(60);renderInventory()}
-function openNewProductModal(bc){document.getElementById('product-modal-title').textContent='Nuevo Producto';document.getElementById('prod-id').value='';document.getElementById('prod-barcode').value=bc||'';document.getElementById('prod-name').value='';document.getElementById('prod-category').value='';document.getElementById('prod-unit-price').value='';document.getElementById('prod-units-per-box').value='12';document.getElementById('prod-box-price').value='';document.getElementById('prod-stock').value='0';document.getElementById('prod-min-stock').value='6';document.getElementById('btn-delete-product').style.display='none';openModal('product-modal')}
-function openEditProductModal(id){const p=DB.findProductById(id);if(!p)return;document.getElementById('product-modal-title').textContent='Editar Producto';document.getElementById('prod-id').value=p.id;document.getElementById('prod-barcode').value=p.barcode;document.getElementById('prod-name').value=p.name;document.getElementById('prod-category').value=p.category||'';document.getElementById('prod-unit-price').value=p.unitPrice;document.getElementById('prod-units-per-box').value=p.unitsPerBox;document.getElementById('prod-box-price').value=p.boxPrice;document.getElementById('prod-stock').value=p.stock;document.getElementById('prod-min-stock').value=p.minStock;document.getElementById('btn-delete-product').style.display='flex';openModal('product-modal')}
-function saveProduct(){try{const id=document.getElementById('prod-id').value;const ant=id?DB.findProductById(id):null;const bc=document.getElementById('prod-barcode').value.trim();const nm=document.getElementById('prod-name').value.trim();const upb=parseInt(document.getElementById('prod-units-per-box').value,10);if(!nm){showToast('Escribe el nombre','danger');return}if(!bc){showToast('Escribe el código','danger');return}if(!Number.isInteger(upb)||upb<1){showToast('Unidades por caja debe ser 1 o más','danger');return}const dup=DB.getProducts().find(p=>p.barcode===bc&&p.id!==id);if(dup){showToast('Ese código ya lo usa: '+dup.name,'danger');vibrar([80,40,80]);return}const prod={id:id||uid('p_'),barcode:bc,name:nm,category:document.getElementById('prod-category').value.trim(),unitPrice:Math.max(0,parseFloat(document.getElementById('prod-unit-price').value)||0),boxPrice:Math.max(0,parseFloat(document.getElementById('prod-box-price').value)||0),unitsPerBox:upb,stock:Math.max(0,parseInt(document.getElementById('prod-stock').value,10)||0),minStock:Math.max(0,parseInt(document.getElementById('prod-min-stock').value,10)||0),createdAt:ant?ant.createdAt:Date.now()};DB.upsertProduct(prod);closeModal('product-modal');renderInventory();showToast('Producto guardado','primary');vibrar(60)}catch(e){showToast('Error: '+e.message,'danger')}}
+function saveRates(){const bcv=parseFloat(document.getElementById('rate-bcv').value)||0;const avg=parseFloat(document.getElementById('rate-avg').value)||0;if(bcv<=0&&avg<=0){showToast('Ingresa al menos una tasa','danger');return}saveRatesToStorage({bcv:bcv,avg:avg});showToast('Tasas guardadas: BCV='+dinero(bcv)+', Prom='+dinero(avg),'primary');vibrar(60);renderInventory();renderCart()}
+
+function toggleAutoCalc(){
+  const check=document.getElementById('auto-calc-check').checked;
+  document.getElementById('cost-section').style.display=check?'block':'none';
+  if(check)updateCalcPreview();
+}
+function updateCalcPreview(){
+  const cost=parseFloat(document.getElementById('prod-cost').value)||0;
+  const marginDet=parseFloat(document.getElementById('prod-margin-det').value)||0;
+  const marginMay=parseFloat(document.getElementById('prod-margin-may').value)||0;
+  const upb=parseInt(document.getElementById('prod-units-per-box').value,10)||1;
+  const precioDet=cost*(1+marginDet/100);
+  const precioCaja=(cost*upb)*(1+marginMay/100);
+  document.getElementById('calc-preview-det').textContent=dinero(precioDet);
+  document.getElementById('calc-preview-may').textContent=dinero(precioCaja);
+  document.getElementById('prod-unit-price').value=dinero(precioDet);
+  document.getElementById('prod-box-price').value=dinero(precioCaja);
+}
+
+function openNewProductModal(bc){
+  document.getElementById('product-modal-title').textContent='Nuevo Producto';
+  document.getElementById('prod-id').value='';
+  document.getElementById('prod-barcode').value=bc||'';
+  document.getElementById('prod-name').value='';
+  document.getElementById('prod-category').value='';
+  document.getElementById('auto-calc-check').checked=false;
+  toggleAutoCalc();
+  document.getElementById('prod-cost').value='';
+  document.getElementById('prod-margin-det').value='';
+  document.getElementById('prod-margin-may').value='';
+  document.getElementById('prod-unit-price').value='';
+  document.getElementById('prod-units-per-box').value='12';
+  document.getElementById('prod-box-price').value='';
+  document.getElementById('prod-stock').value='0';
+  document.getElementById('prod-min-stock').value='6';
+  document.getElementById('btn-delete-product').style.display='none';
+  openModal('product-modal');
+}
+
+function openEditProductModal(id){
+  const p=DB.findProductById(id);if(!p)return;
+  document.getElementById('product-modal-title').textContent='Editar Producto';
+  document.getElementById('prod-id').value=p.id;
+  document.getElementById('prod-barcode').value=p.barcode;
+  document.getElementById('prod-name').value=p.name;
+  document.getElementById('prod-category').value=p.category||'';
+  const hasCost=p.costPrice&&p.costPrice>0;
+  document.getElementById('auto-calc-check').checked=hasCost;
+  toggleAutoCalc();
+  document.getElementById('prod-cost').value=p.costPrice||'';
+  document.getElementById('prod-margin-det').value=p.marginDet||'';
+  document.getElementById('prod-margin-may').value=p.marginMay||'';
+  document.getElementById('prod-unit-price').value=p.unitPrice;
+  document.getElementById('prod-units-per-box').value=p.unitsPerBox;
+  document.getElementById('prod-box-price').value=p.boxPrice;
+  document.getElementById('prod-stock').value=p.stock;
+  document.getElementById('prod-min-stock').value=p.minStock;
+  document.getElementById('btn-delete-product').style.display='flex';
+  if(hasCost)updateCalcPreview();
+  openModal('product-modal');
+}
+
+function saveProduct(){
+  try{
+    const id=document.getElementById('prod-id').value;
+    const ant=id?DB.findProductById(id):null;
+    const bc=document.getElementById('prod-barcode').value.trim();
+    const nm=document.getElementById('prod-name').value.trim();
+    const upb=parseInt(document.getElementById('prod-units-per-box').value,10);
+    const useAutoCalc=document.getElementById('auto-calc-check').checked;
+    const costPrice=parseFloat(document.getElementById('prod-cost').value)||0;
+    const marginDet=parseFloat(document.getElementById('prod-margin-det').value)||0;
+    const marginMay=parseFloat(document.getElementById('prod-margin-may').value)||0;
+    let unitPrice=parseFloat(document.getElementById('prod-unit-price').value)||0;
+    let boxPrice=parseFloat(document.getElementById('prod-box-price').value)||0;
+    if(useAutoCalc&&costPrice>0){
+      unitPrice=costPrice*(1+marginDet/100);
+      boxPrice=(costPrice*upb)*(1+marginMay/100);
+    }
+    if(!nm){showToast('Escribe el nombre','danger');return}
+    if(!bc){showToast('Escribe el código','danger');return}
+    if(!Number.isInteger(upb)||upb<1){showToast('Unidades por caja debe ser 1 o más','danger');return}
+    const dup=DB.getProducts().find(p=>p.barcode===bc&&p.id!==id);
+    if(dup){showToast('Ese código ya lo usa: '+dup.name,'danger');vibrar([80,40,80]);return}
+    const prod={id:id||uid('p_'),barcode:bc,name:nm,category:document.getElementById('prod-category').value.trim(),unitPrice:Math.max(0,unitPrice),boxPrice:Math.max(0,boxPrice),unitsPerBox:upb,stock:Math.max(0,parseInt(document.getElementById('prod-stock').value,10)||0),minStock:Math.max(0,parseInt(document.getElementById('prod-min-stock').value,10)||0),costPrice:costPrice,marginDet:marginDet,marginMay:marginMay,createdAt:ant?ant.createdAt:Date.now()};
+    DB.upsertProduct(prod);
+    closeModal('product-modal');
+    renderInventory();
+    showToast('Producto guardado','primary');
+    vibrar(60);
+  }catch(e){showToast('Error: '+e.message,'danger')}
+}
+
 function deleteProduct(){const id=document.getElementById('prod-id').value;const p=DB.findProductById(id);if(!p)return;if(!confirm('¿Eliminar "'+p.name+'"?'))return;DB.deleteProduct(id);cart=cart.filter(l=>l.productId!==id);closeModal('product-modal');renderInventory();renderCart();showToast('Eliminado','primary')}
 function openReceiveStockModal(id){const p=DB.findProductById(id);if(!p)return;document.getElementById('recv-id').value=p.id;document.getElementById('recv-info').textContent=p.name+' — 1 caja = '+p.unitsPerBox+' u. Stock actual: '+p.stock+' u.';document.getElementById('recv-boxes').value='0';document.getElementById('recv-loose').value='0';openModal('receive-modal')}
 function receiveStockByBox(pid,cj,us){const p=DB.findProductById(pid);if(!p)throw new Error('Producto no encontrado');const c=Math.max(0,parseInt(cj,10)||0);const u=Math.max(0,parseInt(us,10)||0);const tot=(c*p.unitsPerBox)+u;if(tot<=0)throw new Error('Indica cajas o unidades');p.stock+=tot;DB.upsertProduct(p);return tot}
 function confirmReceiveStock(){try{const id=document.getElementById('recv-id').value;const sum=receiveStockByBox(id,document.getElementById('recv-boxes').value,document.getElementById('recv-loose').value);closeModal('receive-modal');renderInventory();showToast('+'+sum+' unidades al stock','primary');vibrar(60)}catch(e){showToast(e.message,'danger');vibrar([80,40,80])}}
+
 function unidadesEnCarrito(pid){return cart.filter(l=>l.productId===pid).reduce((s,l)=>s+l.realQty,0)}
 function addToCart(pid,qty,asBox){const p=DB.findProductById(pid);if(!p){showToast('No encontrado','danger');return false}const cant=Math.max(1,parseInt(qty,10)||1);const real=asBox?cant*p.unitsPerBox:cant;if(p.stock<=0){showToast('Sin stock: '+p.name,'danger');vibrar([80,40,80]);return false}if(unidadesEnCarrito(pid)+real>p.stock){showToast('Stock insuficiente de '+p.name,'danger');vibrar([80,40,80]);return false}const up=asBox?(p.boxPrice/p.unitsPerBox):p.unitPrice;const pl=asBox?p.boxPrice:p.unitPrice;const md=asBox?'box':'unit';const ex=cart.find(l=>l.productId===pid&&l.mode===md);if(ex){ex.qty+=cant;ex.realQty+=real}else{cart.push({productId:p.id,name:p.name,qty:cant,realQty:real,unitPrice:up,displayPrice:pl,mode:md,unitsPerBox:p.unitsPerBox})}renderCart();return true}
 function sellFromInventory(id,asBox){if(addToCart(id,1,asBox)){const p=DB.findProductById(id);showToast('Agregado: '+p.name+(asBox?' (caja)':''),'primary');vibrar(60);switchView('view-pos')}}
+
 function cartTotal(){return cart.reduce((s,l)=>s+(l.qty*l.displayPrice),0)}
-function renderCart(){const cont=document.getElementById('cart-container');if(cart.length===0){cont.innerHTML='<p class="empty-msg">Carrito vacío.<br><br>Ve a 📦 Inventario y toca "🛒 Unidad" o "📦 Caja", o usa 📷 Escanear.</p>';document.getElementById('cart-total').textContent='0.00';document.getElementById('btn-checkout').disabled=true;return}const rates=getRates();const totalUSD=cartTotal();const totalBS=totalUSD*rates[selectedRate];cont.innerHTML=cart.map((l,i)=>'<div class="cart-item"><div style="flex:1;padding-right:8px"><div style="font-weight:600">'+textoSeguro(l.name)+'</div><div class="muted small">$'+dinero(l.displayPrice)+' × '+l.qty+' '+(l.mode==='box'?'caja(s)':'unidad(es)')+'</div><div class="small" style="color:var(--primary)">$'+dinero(l.qty*l.displayPrice)+' · descuenta '+l.realQty+' u</div></div><div class="cart-controls"><button onclick="updateCartQty('+i+',-1)">−</button><span style="min-width:26px;text-align:center;font-weight:bold">'+l.qty+'</span><button onclick="updateCartQty('+i+',1)">+</button></div></div>').join('');document.getElementById('cart-total').textContent=dinero(totalUSD);document.getElementById('btn-checkout').disabled=false}
+function renderCart(){
+  const cont=document.getElementById('cart-container');
+  if(cart.length===0){cont.innerHTML='<p class="empty-msg">Carrito vacío.<br><br>Ve a 📦 Inventario y toca "🛒 Unidad" o "📦 Caja", o usa 📷 Escanear.</p>';document.getElementById('cart-total').textContent='0.00';document.getElementById('cart-total-bs').textContent='0.00';document.getElementById('btn-checkout').disabled=true;return}
+  const rates=getRates();
+  const totalUSD=cartTotal();
+  const totalBS=totalUSD*(rates[selectedRate]||rates.bcv||0);
+  cont.innerHTML=cart.map((l,i)=>'<div class="cart-item"><div style="flex:1;padding-right:8px"><div style="font-weight:600">'+textoSeguro(l.name)+'</div><div class="muted small">$'+dinero(l.displayPrice)+' × '+l.qty+' '+(l.mode==='box'?'caja(s)':'unidad(es)')+'</div><div class="small" style="color:var(--primary)">$'+dinero(l.qty*l.displayPrice)+' · descuenta '+l.realQty+' u</div></div><div class="cart-controls"><button onclick="updateCartQty('+i+',-1)">−</button><span style="min-width:26px;text-align:center;font-weight:bold">'+l.qty+'</span><button onclick="updateCartQty('+i+',1)">+</button></div></div>').join('');
+  document.getElementById('cart-total').textContent=dinero(totalUSD);
+  document.getElementById('cart-total-bs').textContent=dinero(totalBS);
+  document.getElementById('btn-checkout').disabled=false;
+}
+
 function updateCartQty(idx,delta){const ln=cart[idx];if(!ln)return;if(delta>0){const ext=ln.mode==='box'?ln.unitsPerBox:1;const p=DB.findProductById(ln.productId);if(!p||unidadesEnCarrito(ln.productId)+ext>p.stock){showToast('Stock insuficiente','danger');vibrar([80,40,80]);return}ln.qty+=1;ln.realQty+=ext}else{ln.qty-=1;ln.realQty-=(ln.mode==='box'?ln.unitsPerBox:1);if(ln.qty<=0)cart.splice(idx,1)}renderCart()}
 function clearCart(){if(cart.length===0){showToast('Ya está vacío','warn');return}if(!confirm('¿Vaciar el carrito?'))return;cart=[];renderCart();showToast('Carrito vacío','primary')}
-function selectRate(rate){selectedRate=rate;document.querySelectorAll('.rate-option').forEach(el=>el.classList.remove('selected'));document.getElementById('rate-opt-'+rate).classList.add('selected');document.getElementById('rate-opt-'+rate).querySelector('input').checked=true;calculateChange()}
+
+function selectRate(rate){
+  selectedRate=rate;
+  document.querySelectorAll('.rate-option').forEach(el=>el.classList.remove('selected'));
+  document.getElementById('rate-opt-'+rate).classList.add('selected');
+  document.getElementById('rate-opt-'+rate).querySelector('input').checked=true;
+  const rates=getRates();
+  const totalUSD=cartTotal();
+  const totalBS=totalUSD*(rates[rate]||0);
+  document.getElementById('checkout-total-bs').textContent=dinero(totalBS);
+  calculateChange();
+  renderCart();
+}
 function setPayCurrency(cur){payCurrency=cur;document.getElementById('pay-usd').className='btn btn-sm '+(cur==='USD'?'btn-primary':'btn-ghost');document.getElementById('pay-bs').className='btn btn-sm '+(cur==='BS'?'btn-primary':'btn-ghost');document.getElementById('cash-label').textContent='Efectivo recibido ('+(cur==='USD'?'USD $':'Bs')+')';calculateChange()}
-function openCheckoutModal(){if(cart.length===0){showToast('Carrito vacío','warn');return}const rates=getRates();const totalUSD=cartTotal();const totalBS=totalUSD*rates[selectedRate];document.getElementById('checkout-total').textContent=dinero(totalUSD);document.getElementById('checkout-total-bs').textContent=dinero(totalBS);document.getElementById('rate-bcv-display').textContent=dinero(rates.bcv)+' Bs/$';document.getElementById('rate-avg-display').textContent=dinero(rates.avg)+' Bs/$';document.getElementById('cash-received').value='';document.getElementById('change-usd').textContent='$0.00';document.getElementById('change-bs').textContent='Bs 0.00';document.getElementById('btn-confirm-sale').disabled=true;selectedRate='bcv';payCurrency='USD';selectRate('bcv');setPayCurrency('USD');openModal('checkout-modal');setTimeout(()=>document.getElementById('cash-received').focus(),150)}
-function calculateChange(){const rates=getRates();const rate=rates[selectedRate]||0;const totalUSD=cartTotal();const totalBS=totalUSD*rate;const cashInput=parseFloat(document.getElementById('cash-received').value)||0;let cashUSD=0,cashBS=0;if(payCurrency==='USD'){cashUSD=cashInput;cashBS=cashInput*rate}else{cashBS=cashInput;cashUSD=cashInput/rate}const changeUSD=cashUSD-totalUSD;const changeBS=cashBS-totalBS;const elUSD=document.getElementById('change-usd');const elBS=document.getElementById('change-bs');const btn=document.getElementById('btn-confirm-sale');if(changeUSD<0){elUSD.textContent='Faltan $'+dinero(Math.abs(changeUSD));elUSD.className='change-neg';elBS.textContent='Faltan Bs '+dinero(Math.abs(changeBS));elBS.className='change-neg';btn.disabled=true}else{elUSD.textContent='$'+dinero(changeUSD);elUSD.className='change-pos';elBS.textContent='Bs '+dinero(changeBS);elBS.className='change-pos currency-bs';btn.disabled=false}}
-function processSale(){if(cart.length===0){showToast('Carrito vacío','warn');return}const rates=getRates();const rate=rates[selectedRate]||0;const totalUSD=cartTotal();const totalBS=totalUSD*rate;const cashInput=parseFloat(document.getElementById('cash-received').value)||0;let cashUSD=0,cashBS=0;if(payCurrency==='USD'){cashUSD=cashInput;cashBS=cashInput*rate}else{cashBS=cashInput;cashUSD=cashInput/rate}if(cashUSD<totalUSD){showToast('Efectivo insuficiente','danger');vibrar([80,40,80]);return}const prods=DB.getProducts();const resp=JSON.stringify(prods);try{const items=[];for(const ln of cart){const p=prods.find(x=>x.id===ln.productId);if(!p)throw new Error('Stock insuficiente: '+ln.name);if(p.stock<ln.realQty)throw new Error('Stock insuficiente: '+p.name);p.stock-=ln.realQty;items.push({productId:p.id,name:p.name,qty:ln.qty,mode:ln.mode,unitPriceAtSale:ln.unitPrice,displayPriceAtSale:ln.displayPrice,realQty:ln.realQty})}const venta={id:uid('s_'),date:new Date().toISOString(),totalUSD:totalUSD,totalBS:totalBS,rateUsed:rate,rateType:selectedRate,payCurrency:payCurrency,cashUSD:cashUSD,cashBS:cashBS,changeUSD:cashUSD-totalUSD,changeBS:cashBS-totalBS,items:items};DB.saveProducts(prods);DB.addSale(venta);cart=[];renderCart();updateAlertBadge();closeModal('checkout-modal');showToast('Venta: $'+dinero(totalUSD)+' / Bs '+dinero(totalBS),'primary');vibrar(60);switchView('view-sales');return venta}catch(e){DB.saveProducts(JSON.parse(resp));showToast(e.message,'danger');vibrar([80,40,80])}}
-function renderSales(){const vts=DB.getSales();const cont=document.getElementById('sales-list');const res=document.getElementById('sales-summary');const hoy=new Date().toDateString();const vHoy=vts.filter(v=>new Date(v.date).toDateString()===hoy);const tHoy=vHoy.reduce((s,v)=>s+(v.totalUSD||0),0);res.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><div><div class="muted small">Vendido hoy</div><div style="font-size:1.6rem;font-weight:bold;color:var(--primary)">$'+dinero(tHoy)+'</div></div><div style="text-align:right"><div class="muted small">Ventas de hoy</div><div style="font-size:1.6rem;font-weight:bold">'+vHoy.length+'</div></div></div>';if(vts.length===0){cont.innerHTML='<div class="card"><p class="empty-msg">Todavía no hay ventas.</p></div>';return}cont.innerHTML=vts.map(v=>{const f=new Date(v.date);const fecha=f.toLocaleDateString()+' '+f.toLocaleTimeString('es-VE',{hour:'2-digit',minute:'2-digit'});const its=v.items.map(i=>'<div class="muted small">'+i.qty+' '+(i.mode==='box'?'caja':'und')+' · '+textoSeguro(i.name)+' — $'+dinero(i.qty*i.displayPriceAtSale)+'</div>').join('');const rateLabel=v.rateType==='bcv'?'BCV':'Prom';return'<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><strong class="small">'+fecha+'</strong><strong style="color:var(--primary)">$'+dinero(v.totalUSD)+'</strong></div><div class="small muted" style="margin-bottom:6px">Tasa '+rateLabel+': '+dinero(v.rateUsed)+' Bs/$ · Total Bs: <span class="currency-bs">'+dinero(v.totalBS)+'</span> · Pagó en '+v.payCurrency+'</div>'+its+'<div class="muted small" style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px">Efectivo $'+dinero(v.cashUSD)+' / Bs '+dinero(v.cashBS)+' · Cambio $'+dinero(v.changeUSD)+' / Bs '+dinero(v.changeBS)+'</div></div>'}).join('')}
+
+function openCheckoutModal(){
+  if(cart.length===0){showToast('Carrito vacío','warn');return}
+  const rates=getRates();
+  const totalUSD=cartTotal();
+  const totalBS=totalUSD*(rates[selectedRate]||rates.bcv||0);
+  document.getElementById('checkout-total').textContent=dinero(totalUSD);
+  document.getElementById('checkout-total-bs').textContent=dinero(totalBS);
+  document.getElementById('rate-bcv-display').textContent=dinero(rates.bcv)+' Bs/$';
+  document.getElementById('rate-avg-display').textContent=dinero(rates.avg)+' Bs/$';
+  document.getElementById('cash-received').value='';
+  document.getElementById('change-usd').textContent='$0.00';
+  document.getElementById('change-bs').textContent='Bs 0.00';
+  document.getElementById('btn-confirm-sale').disabled=true;
+  selectedRate='bcv';payCurrency='USD';
+  selectRate('bcv');setPayCurrency('USD');
+  openModal('checkout-modal');
+  setTimeout(()=>document.getElementById('cash-received').focus(),150);
+}
+
+function calculateChange(){
+  const rates=getRates();
+  const rate=rates[selectedRate]||0;
+  const totalUSD=cartTotal();
+  const totalBS=totalUSD*rate;
+  const cashInput=parseFloat(document.getElementById('cash-received').value)||0;
+  let cashUSD=0,cashBS=0;
+  if(payCurrency==='USD'){cashUSD=cashInput;cashBS=cashInput*rate}else{cashBS=cashInput;cashUSD=cashInput/rate}
+  const changeUSD=cashUSD-totalUSD;
+  const changeBS=cashBS-totalBS;
+  const elUSD=document.getElementById('change-usd');
+  const elBS=document.getElementById('change-bs');
+  const btn=document.getElementById('btn-confirm-sale');
+  if(changeUSD<0){elUSD.textContent='Faltan $'+dinero(Math.abs(changeUSD));elUSD.className='change-neg';elBS.textContent='Faltan Bs '+dinero(Math.abs(changeBS));elBS.className='change-neg';btn.disabled=true}else{elUSD.textContent='$'+dinero(changeUSD);elUSD.className='change-pos';elBS.textContent='Bs '+dinero(changeBS);elBS.className='change-pos currency-bs';btn.disabled=false}
+}
+
+function processSale(){
+  if(cart.length===0){showToast('Carrito vacío','warn');return}
+  const rates=getRates();
+  const rate=rates[selectedRate]||0;
+  const totalUSD=cartTotal();
+  const totalBS=totalUSD*rate;
+  const cashInput=parseFloat(document.getElementById('cash-received').value)||0;
+  let cashUSD=0,cashBS=0;
+  if(payCurrency==='USD'){cashUSD=cashInput;cashBS=cashInput*rate}else{cashBS=cashInput;cashUSD=cashInput/rate}
+  if(cashUSD<totalUSD){showToast('Efectivo insuficiente','danger');vibrar([80,40,80]);return}
+  const prods=DB.getProducts();
+  const resp=JSON.stringify(prods);
+  try{
+    const items=[];
+    for(const ln of cart){const p=prods.find(x=>x.id===ln.productId);if(!p)throw new Error('Stock insuficiente: '+ln.name);if(p.stock<ln.realQty)throw new Error('Stock insuficiente: '+p.name);p.stock-=ln.realQty;items.push({productId:p.id,name:p.name,qty:ln.qty,mode:ln.mode,unitPriceAtSale:ln.unitPrice,displayPriceAtSale:ln.displayPrice,realQty:ln.realQty,costPriceAtSale:p.costPrice||0})}
+    const venta={id:uid('s_'),date:new Date().toISOString(),totalUSD:totalUSD,totalBS:totalBS,rateUsed:rate,rateType:selectedRate,payCurrency:payCurrency,cashUSD:cashUSD,cashBS:cashBS,changeUSD:cashUSD-totalUSD,changeBS:cashBS-totalBS,items:items};
+    DB.saveProducts(prods);DB.addSale(venta);cart=[];renderCart();updateAlertBadge();closeModal('checkout-modal');showToast('Venta: $'+dinero(totalUSD)+' / Bs '+dinero(totalBS),'primary');vibrar(60);switchView('view-sales');return venta;
+  }catch(e){DB.saveProducts(JSON.parse(resp));showToast(e.message,'danger');vibrar([80,40,80])}
+}
+
+function renderSales(){
+  const vts=DB.getSales();
+  const cont=document.getElementById('sales-list');
+  const res=document.getElementById('sales-summary');
+  const hoy=new Date().toDateString();
+  const vHoy=vts.filter(v=>new Date(v.date).toDateString()===hoy);
+  const tHoy=vHoy.reduce((s,v)=>s+(v.totalUSD||0),0);
+  const tHoyBs=vHoy.reduce((s,v)=>s+(v.totalBS||0),0);
+  const ganHoy=vHoy.reduce((s,v)=>s+v.items.reduce((ss,i)=>ss+((i.displayPriceAtSale-(i.costPriceAtSale||0))*i.qty),0),0);
+  res.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><div><div class="muted small">Vendido hoy (USD)</div><div style="font-size:1.6rem;font-weight:bold;color:var(--primary)">$'+dinero(tHoy)+'</div><div class="small" style="color:var(--accent);margin-top:4px">Ganancia: $'+dinero(ganHoy)+'</div></div><div style="text-align:right"><div class="muted small">Vendido hoy (Bs)</div><div style="font-size:1.6rem;font-weight:bold" class="currency-bs">Bs '+dinero(tHoyBs)+'</div><div class="muted small" style="margin-top:4px">'+vHoy.length+' ventas</div></div></div>';
+  if(vts.length===0){cont.innerHTML='<div class="card"><p class="empty-msg">Todavía no hay ventas.</p></div>';return}
+  cont.innerHTML=vts.map(v=>{
+    const f=new Date(v.date);
+    const fecha=f.toLocaleDateString()+' '+f.toLocaleTimeString('es-VE',{hour:'2-digit',minute:'2-digit'});
+    const its=v.items.map(i=>'<div class="muted small">'+i.qty+' '+(i.mode==='box'?'caja':'und')+' · '+textoSeguro(i.name)+' — $'+dinero(i.qty*i.displayPriceAtSale)+' <span style="color:var(--primary);font-size:.75rem">(gan $'+dinero((i.displayPriceAtSale-(i.costPriceAtSale||0))*i.qty)+')</span></div>').join('');
+    const rateLabel=v.rateType==='bcv'?'BCV':'Prom';
+    const gananciaTotal=v.items.reduce((s,i)=>s+((i.displayPriceAtSale-(i.costPriceAtSale||0))*i.qty),0);
+    return'<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><strong class="small">'+fecha+'</strong><strong style="color:var(--primary)">$'+dinero(v.totalUSD)+'</strong></div><div class="small muted" style="margin-bottom:6px">Tasa '+rateLabel+': '+dinero(v.rateUsed)+' Bs/$ · Total Bs: <span class="currency-bs">'+dinero(v.totalBS)+'</span> · Pagó en '+v.payCurrency+'</div>'+its+'<div class="small" style="color:var(--accent);font-weight:600;margin-top:6px">💰 Ganancia total: $'+dinero(gananciaTotal)+'</div><div class="muted small" style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px">Efectivo $'+dinero(v.cashUSD)+' / Bs '+dinero(v.cashBS)+' · Cambio $'+dinero(v.changeUSD)+' / Bs '+dinero(v.changeBS)+'</div></div>';
+  }).join('');
+}
+
 function setScanStatus(t){document.getElementById('scanner-status').textContent=t}
 function initDetector(){if(!('BarcodeDetector' in window)){setScanStatus('Navegador no soporta escáner. Usa el campo manual.');return}try{barcodeDetector=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128','code_39','qr_code']})}catch(e){try{barcodeDetector=new BarcodeDetector()}catch(e2){barcodeDetector=null}}}
 async function startScanner(){if(videoStream)return;if(!barcodeDetector){showToast('Escáner no disponible. Usa código manual.','warn');return}if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){setScanStatus('Requiere enlace https:// (GitHub Pages)');showToast('Abre desde tu enlace de GitHub','warn');return}setScanStatus('Iniciando cámara...');try{videoStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});const vid=document.getElementById('scanner-video');vid.srcObject=videoStream;await vid.play();isScanning=true;setScanStatus('Cámara lista. Apunta al código.');document.getElementById('btn-toggle-scan').textContent='⏸️ Pausar';requestAnimationFrame(scanFrame)}catch(e){videoStream=null;setScanStatus('No se pudo abrir la cámara. Usa el código manual.');showToast('Permiso de cámara denegado','danger');vibrar([80,40,80])}}
@@ -218,8 +445,15 @@ function toggleScanner(){if(!videoStream){startScanner();return}if(isScanning){i
 async function scanFrame(){if(!isScanning||!videoStream)return;const vid=document.getElementById('scanner-video');if(vid.readyState>=2){try{const enc=await barcodeDetector.detect(vid);if(enc&&enc.length>0){const code=String(enc[0].rawValue||'').trim();const ahora=Date.now();if(code&&(code!==lastCode||ahora-lastCodeTime>1500)){lastCode=code;lastCodeTime=ahora;vibrar(60);handleScannedCode(code);return}}}catch(e){}}requestAnimationFrame(scanFrame)}
 function handleScannedCode(code){const lim=String(code||'').trim();if(!lim)return;const p=DB.findProductByBarcode(lim);if(p){if(addToCart(p.id,1,false)){showToast('Agregado: '+p.name,'primary');switchView('view-pos')}}else{showToast('Código nuevo: regístralo','warn');vibrar([80,40,80]);stopScanner(true);switchView('view-inventory');openNewProductModal(lim)}}
 function handleManualScan(){const inp=document.getElementById('manual-barcode');const code=inp.value.trim();if(!code){showToast('Escribe un código','warn');return}handleScannedCode(code);inp.value=''}
-function exportBackup(){try{const data={app:'micro-pos',version:2,exportDate:new Date().toISOString(),products:DB.getProducts(),sales:DB.getSales(),rates:getRates()};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='respaldo_pos_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('Respaldo descargado','primary');vibrar(60)}catch(e){showToast('Error: '+e.message,'danger')}}
+
+function exportBackup(){try{const data={app:'micro-pos',version:4,exportDate:new Date().toISOString(),products:DB.getProducts(),sales:DB.getSales(),rates:getRates()};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='respaldo_pos_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('Respaldo descargado','primary');vibrar(60)}catch(e){showToast('Error: '+e.message,'danger')}}
 function importBackup(ev){const file=ev.target.files&&ev.target.files[0];if(!file)return;if(!confirm('Esto REEMPLAZA tu inventario, ventas y tasas. ¿Continuar?')){ev.target.value='';return}const reader=new FileReader();reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(!data||!Array.isArray(data.products))throw new Error('Archivo inválido');localStorage.setItem(KEY_PRODUCTS,JSON.stringify(data.products));localStorage.setItem(KEY_SALES,JSON.stringify(Array.isArray(data.sales)?data.sales:[]));if(data.rates)saveRatesToStorage(data.rates);cart=[];showToast('Datos restaurados','primary');vibrar([60,40,60]);setTimeout(()=>location.reload(),900)}catch(err){showToast('Error: '+err.message,'danger');vibrar([80,40,80])}};reader.onerror=()=>showToast('No se pudo leer','danger');reader.readAsText(file);ev.target.value=''}
+
+document.getElementById('prod-cost').addEventListener('input',updateCalcPreview);
+document.getElementById('prod-margin-det').addEventListener('input',updateCalcPreview);
+document.getElementById('prod-margin-may').addEventListener('input',updateCalcPreview);
+document.getElementById('prod-units-per-box').addEventListener('input',updateCalcPreview);
+
 function init(){try{seedData();initDetector();renderCart();renderInventory();renderSales();updateAlertBadge();document.getElementById('manual-barcode').addEventListener('keydown',e=>{if(e.key==='Enter')handleManualScan()});document.addEventListener('visibilitychange',()=>{if(document.hidden)stopScanner(true)})}catch(e){alert('Error al iniciar: '+e.message)}}
 window.addEventListener('DOMContentLoaded',init);
 </script>
