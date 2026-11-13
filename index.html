@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#3182ce">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
 <title>Mi POS - Bebidas y Jugos</title>
 <style>
 :root{--bg:#f5f7fa;--card:#ffffff;--border:#e2e8f0;--text:#1a202c;--muted:#718096;--primary:#38a169;--primary-light:#c6f6d5;--danger:#e53e3e;--danger-light:#fed7d7;--warn:#d69e2e;--warn-light:#fefcbf;--accent:#3182ce;--accent-light:#bee3f8;--shadow:0 2px 8px rgba(0,0,0,.08);--safe-bottom:env(safe-area-inset-bottom,0px)}
@@ -475,6 +478,12 @@ document.getElementById('prod-margin-may').addEventListener('input',updateCalcPr
 
 function init(){try{seedData();initDetector();renderCart();renderInventory();renderSales();updateAlertBadge();document.getElementById('manual-barcode').addEventListener('keydown',e=>{if(e.key==='Enter')handleManualScan()});document.addEventListener('visibilitychange',()=>{if(document.hidden)stopScanner(true)})}catch(e){alert('Error al iniciar: '+e.message)}}
 window.addEventListener('DOMContentLoaded',init);
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  });
+}
 </script>
 </body>
 </html>
