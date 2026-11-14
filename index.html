@@ -255,13 +255,10 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
 </div>
 
 <script>
-// ====== CONFIGURACIÓN DE LICENCIAS ======
-const LICENSE_SERVER_URL = 'https://gist.githubusercontent.com/esumalave3-cmyk/147bcdd94d1e1a5fb671126a24aa6eac/raw/licencias.json';
-const LICENSE_GRACE_DAYS = 7;
-const KEY_LICENSE = 'pos_license_v1';
-const KEY_CLIENT_ID = 'pos_client_id_v1';
-
-// ====== CONFIGURACIÓN GENERAL ======
+const LICENSE_SERVER_URL='https://gist.githubusercontent.com/esumalave3-cmyk/147bcdd94d1e1a5fb671126a24aa6eac/raw/licencias.json';
+const LICENSE_GRACE_DAYS=7;
+const KEY_LICENSE='pos_license_v1';
+const KEY_CLIENT_ID='pos_client_id_v1';
 const KEY_PRODUCTS='pos_products_v1',KEY_SALES='pos_sales_v1',KEY_RATES='pos_rates_v1',KEY_PIN='pos_pin_v1';
 const MASTER_PIN='2024';
 
@@ -276,18 +273,15 @@ function showToast(m,t){const el=document.getElementById('toast');el.textContent
 function openModal(id){document.getElementById(id).classList.add('active')}
 function closeModal(id){document.getElementById(id).classList.remove('active')}
 let cart=[],videoStream=null,isScanning=false,barcodeDetector=null,lastCode='',lastCodeTime=0,selectedRate='bcv',payCurrency='USD';
-
 let pinInput='',pinMode='login',newPin='';
+
 function pinPress(key){
   const error=document.getElementById('pin-error');
   error.textContent='';
   if(key==='delete'){pinInput=pinInput.slice(0,-1);updatePinDots();return}
   if(key==='master'){
-    if(pinInput===MASTER_PIN){
-      localStorage.removeItem(KEY_PIN);
-      showToast('PIN eliminado. Crea uno nuevo.','primary');
-      setTimeout(()=>location.reload(),1000);
-    }else{error.textContent='PIN maestro incorrecto';vibrar([80,40,80])}
+    if(pinInput===MASTER_PIN){localStorage.removeItem(KEY_PIN);showToast('PIN eliminado. Crea uno nuevo.','primary');setTimeout(()=>location.reload(),1000);}
+    else{error.textContent='PIN maestro incorrecto';vibrar([80,40,80])}
     return;
   }
   if(pinInput.length<4){pinInput+=key;updatePinDots();if(pinInput.length===4)setTimeout(()=>validatePin(),300)}
@@ -651,9 +645,13 @@ function init(){try{seedData();initDetector();renderCart();renderInventory();ren
 })();
 </script>
 <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js').catch(function () {});
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js').then(function(registration){
+      console.log('SW registrado:',registration.scope);
+    }).catch(function(error){
+      console.log('SW falló:',error);
+    });
   });
 }
 </script>
