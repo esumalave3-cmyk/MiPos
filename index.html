@@ -367,8 +367,8 @@ function dinero(n){return Number(n||0).toFixed(2)}
 function redondear(n){return Math.round((Number(n)||0)*100)/100}
 function textoSeguro(t){return String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function showToast(m,t){try{const el=document.getElementById('toast');if(el){el.textContent=m;el.className='toast show '+(t||'primary');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2200)}}catch(e){}}
-function openModal(id){try{document.getElementById(id).classList.add('active')}catch(e){console.error('Error abriendo modal:',id,e)}}
-function closeModal(id){try{document.getElementById(id).classList.remove('active')}catch(e){}}
+function openModal(id){try{const el=document.getElementById(id);if(el)el.classList.add('active')}catch(e){console.error('Error abriendo modal:',id,e)}}
+function closeModal(id){try{const el=document.getElementById(id);if(el)el.classList.remove('active')}catch(e){}}
 let cart=[],videoStream=null,isScanning=false,barcodeDetector=null,lastCode='',lastCodeTime=0,selectedRate='bcv',payCurrency='USD',payType='contado';
 let pinInput='',pinMode='login',newPin='';
 let abonoCxcId=null,abonoCurrency='USD';
@@ -684,37 +684,63 @@ function updateCartQty(idx,delta){const ln=cart[idx];if(!ln)return;if(delta>0){c
 function clearCart(){if(cart.length===0){showToast('Ya está vacío','warn');return}if(!confirm('¿Vaciar el carrito?'))return;cart=[];renderCart();showToast('Carrito vacío','primary')}
 
 function setPayType(type){
-  payType=type;
-  document.getElementById('pay-contado').classList.toggle('active',type==='contado');
-  document.getElementById('pay-credito').classList.toggle('active',type==='credito');
-  document.getElementById('credito-fields').style.display=type==='credito'?'block':'none';
-  document.getElementById('cash-section').style.display=type==='contado'?'block':'none';
-  document.getElementById('change-section').style.display=type==='contado'?'block':'none';
-  
-  if(type==='credito'){
-    document.getElementById('cash-received').value='';
-    document.getElementById('change-usd').textContent='$0.00';
-    document.getElementById('change-bs').textContent='Bs 0.00';
-    document.getElementById('btn-confirm-sale').disabled=false;
-  }else{
-    document.getElementById('btn-confirm-sale').disabled=true;
-    calculateChange();
-  }
+  try{
+    payType=type;
+    const btnContado=document.getElementById('pay-contado');
+    const btnCredito=document.getElementById('pay-credito');
+    const creditoFields=document.getElementById('credito-fields');
+    const cashSection=document.getElementById('cash-section');
+    const changeSection=document.getElementById('change-section');
+    const btnConfirm=document.getElementById('btn-confirm-sale');
+    
+    if(btnContado)btnContado.classList.toggle('active',type==='contado');
+    if(btnCredito)btnCredito.classList.toggle('active',type==='credito');
+    if(creditoFields)creditoFields.style.display=type==='credito'?'block':'none';
+    if(cashSection)cashSection.style.display=type==='contado'?'block':'none';
+    if(changeSection)changeSection.style.display=type==='contado'?'block':'none';
+    
+    if(type==='credito'){
+      const cashReceived=document.getElementById('cash-received');
+      const changeUsd=document.getElementById('change-usd');
+      const changeBs=document.getElementById('change-bs');
+      if(cashReceived)cashReceived.value='';
+      if(changeUsd)changeUsd.textContent='$0.00';
+      if(changeBs)changeBs.textContent='Bs 0.00';
+      if(btnConfirm)btnConfirm.disabled=false;
+    }else{
+      if(btnConfirm)btnConfirm.disabled=true;
+      calculateChange();
+    }
+  }catch(e){console.error('Error en setPayType:',e)}
 }
 
 function selectRate(rate){
-  selectedRate=rate;
-  document.querySelectorAll('.rate-option').forEach(el=>el.classList.remove('selected'));
-  document.getElementById('rate-opt-'+rate).classList.add('selected');
-  document.getElementById('rate-opt-'+rate).querySelector('input').checked=true;
-  const rates=getRates();
-  const totalUSD=cartTotal();
-  const totalBS=redondear(totalUSD*(rates[rate]||0));
-  document.getElementById('checkout-total-bs').textContent=dinero(totalBS);
-  if(payType==='contado')calculateChange();
-  renderCart();
+  try{
+    selectedRate=rate;
+    document.querySelectorAll('.rate-option').forEach(el=>el.classList.remove('selected'));
+    const opt=document.getElementById('rate-opt-'+rate);
+    if(opt){opt.classList.add('selected');const radio=opt.querySelector('input');if(radio)radio.checked=true}
+    const rates=getRates();
+    const totalUSD=cartTotal();
+    const totalBS=redondear(totalUSD*(rates[rate]||0));
+    const elTotalBs=document.getElementById('checkout-total-bs');
+    if(elTotalBs)elTotalBs.textContent=dinero(totalBS);
+    if(payType==='contado')calculateChange();
+    renderCart();
+  }catch(e){console.error('Error en selectRate:',e)}
 }
-function setPayCurrency(cur){payCurrency=cur;document.getElementById('pay-usd').className='btn btn-sm '+(cur==='USD'?'btn-primary':'btn-ghost');document.getElementById('pay-bs').className='btn btn-sm '+(cur==='BS'?'btn-primary':'btn-ghost');document.getElementById('cash-label').textContent='Efectivo recibido ('+(cur==='USD'?'USD $':'Bs')+')';calculateChange()}
+function setPayCurrency(cur){
+  try{
+    payCurrency=cur;
+    const btnUsd=document.getElementById('pay-usd');
+    const btnBs=document.getElementById('pay-bs');
+    const cashLabel=document.getElementById('cash-label');
+    if(btnUsd)btnUsd.className='btn btn-sm '+(cur==='USD'?'btn-primary':'btn-ghost');
+    if(btnBs)btnBs.className='btn btn-sm '+(cur==='BS'?'btn-primary':'btn-ghost');
+    if(cashLabel)cashLabel.textContent='Efectivo recibido ('+(cur==='USD'?'USD $':'Bs')+')';
+    calculateChange();
+  }catch(e){console.error('Error en setPayCurrency:',e)}
+}
 
 function openCheckoutModal(){
   try{
@@ -722,24 +748,40 @@ function openCheckoutModal(){
     const rates=getRates();
     const totalUSD=cartTotal();
     const totalBS=redondear(totalUSD*(rates[selectedRate]||rates.bcv||0));
-    document.getElementById('checkout-total').textContent=dinero(totalUSD);
-    document.getElementById('checkout-total-bs').textContent=dinero(totalBS);
-    document.getElementById('rate-bcv-display').textContent=dinero(rates.bcv)+' Bs/$';
-    document.getElementById('rate-avg-display').textContent=dinero(rates.avg)+' Bs/$';
-    document.getElementById('cash-received').value='';
-    document.getElementById('change-usd').textContent='$0.00';
-    document.getElementById('change-bs').textContent='Bs 0.00';
-    document.getElementById('cxc-cliente').value='';
-    document.getElementById('cxc-telefono').value='';
-    document.getElementById('cxc-cedula').value='';
+    
+    const elTotal=document.getElementById('checkout-total');
+    const elTotalBs=document.getElementById('checkout-total-bs');
+    const elRateBcv=document.getElementById('rate-bcv-display');
+    const elRateAvg=document.getElementById('rate-avg-display');
+    const elCash=document.getElementById('cash-received');
+    const elChangeUsd=document.getElementById('change-usd');
+    const elChangeBs=document.getElementById('change-bs');
+    const elCliente=document.getElementById('cxc-cliente');
+    const elTel=document.getElementById('cxc-telefono');
+    const elCed=document.getElementById('cxc-cedula');
+    const btnConfirm=document.getElementById('btn-confirm-sale');
+    
+    if(elTotal)elTotal.textContent=dinero(totalUSD);
+    if(elTotalBs)elTotalBs.textContent=dinero(totalBS);
+    if(elRateBcv)elRateBcv.textContent=dinero(rates.bcv)+' Bs/$';
+    if(elRateAvg)elRateAvg.textContent=dinero(rates.avg)+' Bs/$';
+    if(elCash)elCash.value='';
+    if(elChangeUsd)elChangeUsd.textContent='$0.00';
+    if(elChangeBs)elChangeBs.textContent='Bs 0.00';
+    if(elCliente)elCliente.value='';
+    if(elTel)elTel.value='';
+    if(elCed)elCed.value='';
+    
     payType='contado';payCurrency='USD';selectedRate='bcv';
     setPayType('contado');
-    selectRate('bcv');setPayCurrency('USD');
-    document.getElementById('btn-confirm-sale').disabled=true;
+    selectRate('bcv');
+    setPayCurrency('USD');
+    if(btnConfirm)btnConfirm.disabled=true;
+    
     openModal('checkout-modal');
   }catch(e){
     console.error('Error en openCheckoutModal:',e);
-    showToast('Error al abrir cobro: '+e.message,'danger');
+    showToast('Error: '+e.message,'danger');
   }
 }
 
@@ -751,8 +793,8 @@ function calculateChange(){
     if(payCurrency==='USD'){cashUSD=cashInput;cashBS=redondear(cashInput*rate)}else{cashBS=cashInput;cashUSD=redondear(cashInput/rate)}
     const changeUSD=redondear(cashUSD-totalUSD);const changeBS=redondear(cashBS-totalBS);
     const elUSD=document.getElementById('change-usd');const elBS=document.getElementById('change-bs');const btn=document.getElementById('btn-confirm-sale');
-    if(changeUSD<-0.01){elUSD.textContent='Faltan $'+dinero(Math.abs(changeUSD));elUSD.className='change-neg';elBS.textContent='Faltan Bs '+dinero(Math.abs(changeBS));elBS.className='change-neg';btn.disabled=true}
-    else{elUSD.textContent='$'+dinero(Math.max(0,changeUSD));elUSD.className='change-pos';elBS.textContent='Bs '+dinero(Math.max(0,changeBS));elBS.className='change-pos currency-bs';btn.disabled=false}
+    if(changeUSD<-0.01){if(elUSD){elUSD.textContent='Faltan $'+dinero(Math.abs(changeUSD));elUSD.className='change-neg'}if(elBS){elBS.textContent='Faltan Bs '+dinero(Math.abs(changeBS));elBS.className='change-neg'}if(btn)btn.disabled=true}
+    else{if(elUSD){elUSD.textContent='$'+dinero(Math.max(0,changeUSD));elUSD.className='change-pos'}if(elBS){elBS.textContent='Bs '+dinero(Math.max(0,changeBS));elBS.className='change-pos currency-bs'}if(btn)btn.disabled=false}
   }catch(e){console.error('Error en calculateChange:',e)}
 }
 function processSale(){
@@ -867,9 +909,12 @@ function openAbonoModal(id){
 }
 function setAbonoCurrency(cur){
   abonoCurrency=cur;
-  document.getElementById('abono-pay-usd').className='btn btn-sm '+(cur==='USD'?'btn-primary':'btn-ghost');
-  document.getElementById('abono-pay-bs').className='btn btn-sm '+(cur==='BS'?'btn-primary':'btn-ghost');
-  document.getElementById('abono-cash-label').textContent='Monto del abono ('+(cur==='USD'?'USD $':'Bs')+')';
+  const btnUsd=document.getElementById('abono-pay-usd');
+  const btnBs=document.getElementById('abono-pay-bs');
+  const label=document.getElementById('abono-cash-label');
+  if(btnUsd)btnUsd.className='btn btn-sm '+(cur==='USD'?'btn-primary':'btn-ghost');
+  if(btnBs)btnBs.className='btn btn-sm '+(cur==='BS'?'btn-primary':'btn-ghost');
+  if(label)label.textContent='Monto del abono ('+(cur==='USD'?'USD $':'Bs')+')';
   calcAbono();
 }
 function calcAbono(){
