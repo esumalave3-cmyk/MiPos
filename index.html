@@ -71,18 +71,36 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
 .pin-key:active{background:var(--accent-light);transform:scale(.95)}
 .pin-key.delete{color:var(--danger)}
 .pin-error{color:var(--danger);font-size:.85rem;margin-top:10px;min-height:20px}
+.license-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:var(--bg);padding:20px;text-align:center}
+.license-box{background:var(--card);border-radius:16px;padding:30px;box-shadow:0 10px 40px rgba(0,0,0,.1);width:100%;max-width:380px}
+.license-box h2{color:var(--danger);margin-bottom:12px;font-size:1.3rem}
+.license-box .icon{font-size:3rem;margin-bottom:12px}
+.license-box p{color:var(--muted);margin-bottom:16px;line-height:1.5}
+.license-box .client-id{background:var(--bg);padding:10px;border-radius:8px;font-family:monospace;font-size:.9rem;color:var(--accent);word-break:break-all;margin:12px 0;border:1px dashed var(--accent)}
+.license-box .btn{margin-top:8px}
+.license-status{font-size:.8rem;color:var(--muted);margin-top:12px}
 </style>
 </head>
 <body>
-<div id="pin-screen" class="pin-container">
+
+<div id="license-screen" class="license-screen" style="display:none">
+  <div class="license-box">
+    <div class="icon">🔒</div>
+    <h2>Licencia Vencida</h2>
+    <p>Su suscripción ha expirado. Por favor, contacte a su proveedor para renovar el servicio y continuar usando el sistema.</p>
+    <div class="small muted" style="margin-bottom:8px">Su ID de cliente:</div>
+    <div class="client-id" id="license-client-id">—</div>
+    <button class="btn btn-primary" onclick="retryLicenseCheck()">🔄 Verificar de nuevo</button>
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="showLicenseInfo()">ℹ️ Información</button>
+  </div>
+</div>
+
+<div id="pin-screen" class="pin-container" style="display:none">
   <div class="pin-box">
     <h2>🔐 Acceso Seguro</h2>
     <p id="pin-message">Ingresa tu PIN de 4 dígitos</p>
     <div class="pin-dots" id="pin-dots">
-      <div class="pin-dot"></div>
-      <div class="pin-dot"></div>
-      <div class="pin-dot"></div>
-      <div class="pin-dot"></div>
+      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
     </div>
     <div class="pin-keypad">
       <button class="pin-key" onclick="pinPress('1')">1</button>
@@ -101,6 +119,7 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
     <div class="pin-error" id="pin-error"></div>
   </div>
 </div>
+
 <div id="app-container" style="display:none">
 <header><h1 id="header-title">Punto de Venta</h1><span id="alert-badge" class="badge">0</span></header>
 <main>
@@ -128,12 +147,16 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
       <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBackup(event)">
     </div>
     <div class="card config-card" style="margin-top:12px">
-      <h3 style="margin-bottom:6px">⚙️ Configuración de tasas</h3>
-      <p class="muted small" style="margin-bottom:12px">Actualiza las tasas del día. Los precios de tus productos están en USD.</p>
+      <h3 style="margin-bottom:6px">⚙️ Configuración</h3>
+      <div class="section-title">💱 Tasas del día</div>
+      <p class="muted small" style="margin-bottom:12px">Actualiza las tasas. Los precios están en USD.</p>
       <div class="input-group"><label>Tasa BCV (Bs por USD)</label><input type="number" id="rate-bcv" class="input" step="0.01" min="0" inputmode="decimal" placeholder="Ej: 36.50"></div>
       <div class="input-group"><label>Tasa Promedio (Bs por USD)</label><input type="number" id="rate-avg" class="input" step="0.01" min="0" inputmode="decimal" placeholder="Ej: 38.20"></div>
       <button class="btn btn-warn" onclick="saveRates()">💾 Guardar tasas</button>
-      <button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="changePin()">🔐 Cambiar PIN</button>
+      <div class="section-title" style="margin-top:16px">🔐 Seguridad</div>
+      <button class="btn btn-ghost btn-sm" style="margin-bottom:8px" onclick="changePin()">Cambiar PIN de acceso</button>
+      <button class="btn btn-ghost btn-sm" onclick="showClientId()">🆔 Ver mi ID de licencia</button>
+      <div class="license-status" id="license-status-text"></div>
     </div>
   </div>
   <div id="view-sales" class="view"><div id="sales-summary" class="card"></div><div id="sales-list"></div></div>
@@ -230,9 +253,18 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
 </div>
 <div id="toast" class="toast"></div>
 </div>
+
 <script>
+// ====== CONFIGURACIÓN DE LICENCIAS ======
+const LICENSE_SERVER_URL = 'https://gist.githubusercontent.com/esumalave3-cmyk/147bcdd94d1e1a5fb671126a24aa6eac/raw/licencias.json';
+const LICENSE_GRACE_DAYS = 7;
+const KEY_LICENSE = 'pos_license_v1';
+const KEY_CLIENT_ID = 'pos_client_id_v1';
+
+// ====== CONFIGURACIÓN GENERAL ======
 const KEY_PRODUCTS='pos_products_v1',KEY_SALES='pos_sales_v1',KEY_RATES='pos_rates_v1',KEY_PIN='pos_pin_v1';
-const MASTER_PIN='9876';
+const MASTER_PIN='2024';
+
 const DB={getProducts(){try{return JSON.parse(localStorage.getItem(KEY_PRODUCTS))||[]}catch(e){return[]}},saveProducts(l){localStorage.setItem(KEY_PRODUCTS,JSON.stringify(l))},getSales(){try{return JSON.parse(localStorage.getItem(KEY_SALES))||[]}catch(e){return[]}},saveSales(l){localStorage.setItem(KEY_SALES,JSON.stringify(l))},findProductById(id){return this.getProducts().find(p=>p.id===id)},findProductByBarcode(c){return this.getProducts().find(p=>p.barcode===c)},upsertProduct(p){const l=this.getProducts(),i=l.findIndex(x=>x.id===p.id);if(i>=0)l[i]=p;else l.push(p);this.saveProducts(l)},deleteProduct(id){this.saveProducts(this.getProducts().filter(p=>p.id!==id))},addSale(s){const l=this.getSales();l.unshift(s);if(l.length>100)l.length=100;this.saveSales(l)}};
 function getRates(){try{return JSON.parse(localStorage.getItem(KEY_RATES))||{bcv:0,avg:0}}catch(e){return{bcv:0,avg:0}}}
 function saveRatesToStorage(r){localStorage.setItem(KEY_RATES,JSON.stringify(r))}
@@ -249,87 +281,151 @@ let pinInput='',pinMode='login',newPin='';
 function pinPress(key){
   const error=document.getElementById('pin-error');
   error.textContent='';
-  if(key==='delete'){
-    pinInput=pinInput.slice(0,-1);
-    updatePinDots();
-    return;
-  }
+  if(key==='delete'){pinInput=pinInput.slice(0,-1);updatePinDots();return}
   if(key==='master'){
     if(pinInput===MASTER_PIN){
       localStorage.removeItem(KEY_PIN);
       showToast('PIN eliminado. Crea uno nuevo.','primary');
       setTimeout(()=>location.reload(),1000);
-    }else{
-      error.textContent='PIN maestro incorrecto';
-      vibrar([80,40,80]);
-    }
+    }else{error.textContent='PIN maestro incorrecto';vibrar([80,40,80])}
     return;
   }
-  if(pinInput.length<4){
-    pinInput+=key;
-    updatePinDots();
-    if(pinInput.length===4){
-      setTimeout(()=>validatePin(),300);
-    }
-  }
+  if(pinInput.length<4){pinInput+=key;updatePinDots();if(pinInput.length===4)setTimeout(()=>validatePin(),300)}
 }
-function updatePinDots(){
-  const dots=document.querySelectorAll('.pin-dot');
-  dots.forEach((dot,i)=>{
-    dot.classList.toggle('filled',i<pinInput.length);
-  });
-}
+function updatePinDots(){document.querySelectorAll('.pin-dot').forEach((dot,i)=>dot.classList.toggle('filled',i<pinInput.length))}
 function validatePin(){
   const error=document.getElementById('pin-error');
   const storedPin=localStorage.getItem(KEY_PIN);
   if(pinMode==='login'){
-    if(pinInput===storedPin){
-      document.getElementById('pin-screen').style.display='none';
-      document.getElementById('app-container').style.display='block';
-      init();
-    }else{
-      error.textContent='PIN incorrecto';
-      vibrar([80,40,80]);
-      pinInput='';
-      updatePinDots();
-    }
-  }else if(pinMode==='create'){
-    newPin=pinInput;
-    pinMode='confirm';
-    document.getElementById('pin-message').textContent='Confirma tu nuevo PIN';
-    pinInput='';
-    updatePinDots();
-  }else if(pinMode==='confirm'){
-    if(pinInput===newPin){
-      localStorage.setItem(KEY_PIN,newPin);
-      showToast('PIN actualizado','primary');
-      vibrar(60);
-      document.getElementById('pin-screen').style.display='none';
-      document.getElementById('app-container').style.display='block';
-      init();
-    }else{
-      error.textContent='Los PIN no coinciden. Intenta de nuevo.';
-      vibrar([80,40,80]);
-      pinMode='create';
-      document.getElementById('pin-message').textContent='Crea tu nuevo PIN de 4 dígitos';
-      pinInput='';
-      updatePinDots();
-    }
+    if(pinInput===storedPin){showApp();}
+    else{error.textContent='PIN incorrecto';vibrar([80,40,80]);pinInput='';updatePinDots()}
+  }else if(pinMode==='create'){newPin=pinInput;pinMode='confirm';document.getElementById('pin-message').textContent='Confirma tu nuevo PIN';pinInput='';updatePinDots()}
+  else if(pinMode==='confirm'){
+    if(pinInput===newPin){localStorage.setItem(KEY_PIN,newPin);showToast('PIN actualizado','primary');vibrar(60);showApp()}
+    else{error.textContent='Los PIN no coinciden. Intenta de nuevo.';vibrar([80,40,80]);pinMode='create';document.getElementById('pin-message').textContent='Crea tu nuevo PIN de 4 dígitos';pinInput='';updatePinDots()}
   }
 }
-function changePin(){
-  pinMode='create';
-  pinInput='';
-  newPin='';
-  document.getElementById('pin-message').textContent='Crea tu nuevo PIN de 4 dígitos';
-  document.getElementById('pin-screen').style.display='flex';
+function changePin(){pinMode='create';pinInput='';newPin='';document.getElementById('pin-message').textContent='Crea tu nuevo PIN de 4 dígitos';document.getElementById('pin-screen').style.display='flex';document.getElementById('app-container').style.display='none';updatePinDots()}
+
+function getClientId(){
+  let id=localStorage.getItem(KEY_CLIENT_ID);
+  if(!id){id='cli_'+Date.now().toString(36)+'_'+Math.random().toString(36).substr(2,6);localStorage.setItem(KEY_CLIENT_ID,id)}
+  return id;
+}
+
+function showLicenseScreen(message){
+  document.getElementById('pin-screen').style.display='none';
   document.getElementById('app-container').style.display='none';
-  updatePinDots();
+  document.getElementById('license-screen').style.display='flex';
+  document.getElementById('license-client-id').textContent=getClientId();
+  if(message){document.querySelector('#license-screen p').textContent=message;}
+}
+
+function showLicenseInfo(){
+  const id=getClientId();
+  alert('ID de cliente: '+id+'\n\nEnvíe este ID a su proveedor para renovar la licencia.\n\nÚltima verificación: '+(localStorage.getItem(KEY_LICENSE+'_lastCheck')||'Nunca')+'\nEstado: '+(localStorage.getItem(KEY_LICENSE+'_status')||'Desconocido'));
+}
+
+function showClientId(){
+  const id=getClientId();
+  const lastCheck=localStorage.getItem(KEY_LICENSE+'_lastCheck')||'Nunca';
+  const status=localStorage.getItem(KEY_LICENSE+'_status')||'Desconocido';
+  alert('🆔 Tu ID de licencia:\n\n'+id+'\n\n📅 Última verificación: '+lastCheck+'\n✅ Estado: '+status+'\n\nEnvía este ID a tu proveedor para renovar.');
+}
+
+async function retryLicenseCheck(){
+  showToast('Verificando...','primary');
+  await checkLicense(true);
+}
+
+async function checkLicense(force=false){
+  const clientId=getClientId();
+  const lastCheckStr=localStorage.getItem(KEY_LICENSE+'_lastCheck');
+  const lastStatus=localStorage.getItem(KEY_LICENSE+'_status');
+  const lastExpire=localStorage.getItem(KEY_LICENSE+'_expireDate');
+  
+  if(!force && lastCheckStr && lastStatus==='valid'){
+    const lastCheck=new Date(lastCheckStr);
+    const daysSince=(Date.now()-lastCheck.getTime())/(1000*60*60*24);
+    if(daysSince<LICENSE_GRACE_DAYS){showPinOrApp();return;}
+  }
+  
+  if(!navigator.onLine){
+    if(lastCheckStr && lastStatus==='valid'){
+      const lastCheck=new Date(lastCheckStr);
+      const daysSince=(Date.now()-lastCheck.getTime())/(1000*60*60*24);
+      if(daysSince<LICENSE_GRACE_DAYS){showToast('Modo offline ('+Math.floor(LICENSE_GRACE_DAYS-daysSince)+' días restantes)','warn');showPinOrApp();return;}
+    }
+    showLicenseScreen('No hay conexión a internet y el período de gracia ha expirado. Conéctese a internet para verificar la licencia.');
+    return;
+  }
+  
+  try{
+    const controller=new AbortController();
+    const timeoutId=setTimeout(()=>controller.abort(),8000);
+    const response=await fetch(LICENSE_SERVER_URL,{signal:controller.signal,cache:'no-store'});
+    clearTimeout(timeoutId);
+    if(!response.ok)throw new Error('Error del servidor');
+    const data=await response.json();
+    const expireDate=data[clientId];
+    const today=new Date().toISOString().split('T')[0];
+    localStorage.setItem(KEY_LICENSE+'_lastCheck',new Date().toISOString());
+    if(!expireDate){
+      localStorage.setItem(KEY_LICENSE+'_status','not_found');
+      showLicenseScreen('Este dispositivo no tiene una licencia activa. Contacte a su proveedor con su ID de cliente para activar el servicio.');
+      return;
+    }
+    if(expireDate<today){
+      localStorage.setItem(KEY_LICENSE+'_status','expired');
+      showLicenseScreen('Su licencia venció el '+expireDate+'. Renueve su suscripción para continuar usando el sistema.');
+      return;
+    }
+    localStorage.setItem(KEY_LICENSE+'_status','valid');
+    localStorage.setItem(KEY_LICENSE+'_expireDate',expireDate);
+    showPinOrApp();
+  }catch(e){
+    if(lastStatus==='valid' && lastExpire && lastExpire>=today){showToast('Verificación en segundo plano falló, usando caché','warn');showPinOrApp();return;}
+    showLicenseScreen('No se pudo conectar con el servidor de licencias. Verifique su conexión a internet e intente de nuevo.');
+  }
+}
+
+function showPinOrApp(){
+  const storedPin=localStorage.getItem(KEY_PIN);
+  if(!storedPin){
+    pinMode='create';
+    document.getElementById('license-screen').style.display='none';
+    document.getElementById('pin-screen').style.display='flex';
+    document.getElementById('pin-message').textContent='Crea tu PIN de 4 dígitos';
+    updatePinDots();
+  }else{
+    pinMode='login';
+    document.getElementById('license-screen').style.display='none';
+    document.getElementById('pin-screen').style.display='flex';
+    document.getElementById('pin-message').textContent='Ingresa tu PIN de 4 dígitos';
+    updatePinDots();
+  }
+}
+
+function showApp(){
+  document.getElementById('pin-screen').style.display='none';
+  document.getElementById('license-screen').style.display='none';
+  document.getElementById('app-container').style.display='block';
+  init();
 }
 
 function seedData(){if(localStorage.getItem(KEY_PRODUCTS)!==null)return;const ah=Date.now();DB.saveProducts([{id:'d1',barcode:'7591234567890',name:'Refresco Cola 500ml',category:'Refresco',unitPrice:1.00,boxPrice:10.80,unitsPerBox:12,stock:36,minStock:12,costPrice:0.60,costBox:7.20,marginDet:67,marginMay:50,createdAt:ah},{id:'d2',barcode:'7591234567891',name:'Jugo de Naranja 1L',category:'Jugo',unitPrice:1.50,boxPrice:16.20,unitsPerBox:12,stock:8,minStock:12,costPrice:1.00,costBox:12.00,marginDet:50,marginMay:35,createdAt:ah},{id:'d3',barcode:'7591234567892',name:'Agua Mineral 600ml',category:'Agua',unitPrice:0.50,boxPrice:10.80,unitsPerBox:24,stock:0,minStock:24,costPrice:0.30,costBox:7.20,marginDet:67,marginMay:50,createdAt:ah},{id:'d4',barcode:'7591234567893',name:'Malta Lata 355ml',category:'Malta',unitPrice:1.20,boxPrice:25.92,unitsPerBox:24,stock:48,minStock:24,costPrice:0.80,costBox:19.20,marginDet:50,marginMay:35,createdAt:ah},{id:'d5',barcode:'7591234567894',name:'Jugo en cajita 200ml',category:'Jugo',unitPrice:0.60,boxPrice:6.48,unitsPerBox:12,stock:60,minStock:24,costPrice:0.35,costBox:4.20,marginDet:71,marginMay:55,createdAt:ah}])}
 
-function switchView(vId){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.getElementById(vId).classList.add('active');const ord={'view-pos':0,'view-scan':1,'view-inventory':2,'view-sales':3};document.querySelectorAll('.nav-item')[ord[vId]].classList.add('active');const tit={'view-pos':'Punto de Venta','view-scan':'Escanear','view-inventory':'Inventario','view-sales':'Historial de Ventas'};document.getElementById('header-title').textContent=tit[vId];document.getElementById('total-bar').style.display=(vId==='view-pos')?'flex':'none';if(vId!=='view-scan')stopScanner(true);if(vId==='view-inventory'){renderInventory();loadRatesForm()}if(vId==='view-sales')renderSales();if(vId==='view-pos')renderCart()}
+function switchView(vId){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.getElementById(vId).classList.add('active');const ord={'view-pos':0,'view-scan':1,'view-inventory':2,'view-sales':3};document.querySelectorAll('.nav-item')[ord[vId]].classList.add('active');const tit={'view-pos':'Punto de Venta','view-scan':'Escanear','view-inventory':'Inventario','view-sales':'Historial de Ventas'};document.getElementById('header-title').textContent=tit[vId];document.getElementById('total-bar').style.display=(vId==='view-pos')?'flex':'none';if(vId!=='view-scan')stopScanner(true);if(vId==='view-inventory'){renderInventory();loadRatesForm();updateLicenseStatusText()}if(vId==='view-sales')renderSales();if(vId==='view-pos')renderCart()}
+
+function updateLicenseStatusText(){
+  const status=localStorage.getItem(KEY_LICENSE+'_status')||'Desconocido';
+  const expire=localStorage.getItem(KEY_LICENSE+'_expireDate')||'—';
+  const el=document.getElementById('license-status-text');
+  if(el){
+    const statusText=status==='valid'?'✅ Activa hasta: '+expire:status==='expired'?'⚠️ Vencida':'❓ Sin verificar';
+    el.textContent='Licencia: '+statusText;
+  }
+}
 
 function estadoStock(p){if(p.stock===0)return{pill:'pill-danger',edge:'edge-danger'};if(p.stock<=p.minStock)return{pill:'pill-warn',edge:'edge-warn'};return{pill:'pill-ok',edge:'edge-ok'}}
 
@@ -430,11 +526,7 @@ function saveProduct(){
     const marginMay=parseFloat(document.getElementById('prod-margin-may').value)||0;
     let unitPrice=parseFloat(document.getElementById('prod-unit-price').value)||0;
     let boxPrice=parseFloat(document.getElementById('prod-box-price').value)||0;
-    if(useAutoCalc&&costBox>0&&upb>0){
-      const costUnit=costBox/upb;
-      unitPrice=costUnit*(1+marginDet/100);
-      boxPrice=costBox*(1+marginMay/100);
-    }
+    if(useAutoCalc&&costBox>0&&upb>0){const costUnit=costBox/upb;unitPrice=costUnit*(1+marginDet/100);boxPrice=costBox*(1+marginMay/100)}
     if(!nm){showToast('Escribe el nombre','danger');return}
     if(!bc){showToast('Escribe el código','danger');return}
     if(!Number.isInteger(upb)||upb<1){showToast('Unidades por caja debe ser 1 o más','danger');return}
@@ -442,11 +534,7 @@ function saveProduct(){
     if(dup){showToast('Ese código ya lo usa: '+dup.name,'danger');vibrar([80,40,80]);return}
     const costUnit=upb>0?(costBox/upb):0;
     const prod={id:id||uid('p_'),barcode:bc,name:nm,category:document.getElementById('prod-category').value.trim(),unitPrice:Math.max(0,unitPrice),boxPrice:Math.max(0,boxPrice),unitsPerBox:upb,stock:Math.max(0,parseInt(document.getElementById('prod-stock').value,10)||0),minStock:Math.max(0,parseInt(document.getElementById('prod-min-stock').value,10)||0),costPrice:costUnit,costBox:costBox,marginDet:marginDet,marginMay:marginMay,createdAt:ant?ant.createdAt:Date.now()};
-    DB.upsertProduct(prod);
-    closeModal('product-modal');
-    renderInventory();
-    showToast('Producto guardado','primary');
-    vibrar(60);
+    DB.upsertProduct(prod);closeModal('product-modal');renderInventory();showToast('Producto guardado','primary');vibrar(60);
   }catch(e){showToast('Error: '+e.message,'danger')}
 }
 
@@ -475,18 +563,7 @@ function renderCart(){
 function updateCartQty(idx,delta){const ln=cart[idx];if(!ln)return;if(delta>0){const ext=ln.mode==='box'?ln.unitsPerBox:1;const p=DB.findProductById(ln.productId);if(!p||unidadesEnCarrito(ln.productId)+ext>p.stock){showToast('Stock insuficiente','danger');vibrar([80,40,80]);return}ln.qty+=1;ln.realQty+=ext}else{ln.qty-=1;ln.realQty-=(ln.mode==='box'?ln.unitsPerBox:1);if(ln.qty<=0)cart.splice(idx,1)}renderCart()}
 function clearCart(){if(cart.length===0){showToast('Ya está vacío','warn');return}if(!confirm('¿Vaciar el carrito?'))return;cart=[];renderCart();showToast('Carrito vacío','primary')}
 
-function selectRate(rate){
-  selectedRate=rate;
-  document.querySelectorAll('.rate-option').forEach(el=>el.classList.remove('selected'));
-  document.getElementById('rate-opt-'+rate).classList.add('selected');
-  document.getElementById('rate-opt-'+rate).querySelector('input').checked=true;
-  const rates=getRates();
-  const totalUSD=cartTotal();
-  const totalBS=totalUSD*(rates[rate]||0);
-  document.getElementById('checkout-total-bs').textContent=dinero(totalBS);
-  calculateChange();
-  renderCart();
-}
+function selectRate(rate){selectedRate=rate;document.querySelectorAll('.rate-option').forEach(el=>el.classList.remove('selected'));document.getElementById('rate-opt-'+rate).classList.add('selected');document.getElementById('rate-opt-'+rate).querySelector('input').checked=true;const rates=getRates();const totalUSD=cartTotal();const totalBS=totalUSD*(rates[rate]||0);document.getElementById('checkout-total-bs').textContent=dinero(totalBS);calculateChange();renderCart()}
 function setPayCurrency(cur){payCurrency=cur;document.getElementById('pay-usd').className='btn btn-sm '+(cur==='USD'?'btn-primary':'btn-ghost');document.getElementById('pay-bs').className='btn btn-sm '+(cur==='BS'?'btn-primary':'btn-ghost');document.getElementById('cash-label').textContent='Efectivo recibido ('+(cur==='USD'?'USD $':'Bs')+')';calculateChange()}
 
 function openCheckoutModal(){
@@ -509,33 +586,24 @@ function openCheckoutModal(){
 }
 
 function calculateChange(){
-  const rates=getRates();
-  const rate=rates[selectedRate]||0;
-  const totalUSD=cartTotal();
-  const totalBS=totalUSD*rate;
+  const rates=getRates();const rate=rates[selectedRate]||0;const totalUSD=cartTotal();const totalBS=totalUSD*rate;
   const cashInput=parseFloat(document.getElementById('cash-received').value)||0;
   let cashUSD=0,cashBS=0;
   if(payCurrency==='USD'){cashUSD=cashInput;cashBS=cashInput*rate}else{cashBS=cashInput;cashUSD=cashInput/rate}
-  const changeUSD=cashUSD-totalUSD;
-  const changeBS=cashBS-totalBS;
-  const elUSD=document.getElementById('change-usd');
-  const elBS=document.getElementById('change-bs');
-  const btn=document.getElementById('btn-confirm-sale');
-  if(changeUSD<0){elUSD.textContent='Faltan $'+dinero(Math.abs(changeUSD));elUSD.className='change-neg';elBS.textContent='Faltan Bs '+dinero(Math.abs(changeBS));elBS.className='change-neg';btn.disabled=true}else{elUSD.textContent='$'+dinero(changeUSD);elUSD.className='change-pos';elBS.textContent='Bs '+dinero(changeBS);elBS.className='change-pos currency-bs';btn.disabled=false}
+  const changeUSD=cashUSD-totalUSD;const changeBS=cashBS-totalBS;
+  const elUSD=document.getElementById('change-usd');const elBS=document.getElementById('change-bs');const btn=document.getElementById('btn-confirm-sale');
+  if(changeUSD<0){elUSD.textContent='Faltan $'+dinero(Math.abs(changeUSD));elUSD.className='change-neg';elBS.textContent='Faltan Bs '+dinero(Math.abs(changeBS));elBS.className='change-neg';btn.disabled=true}
+  else{elUSD.textContent='$'+dinero(changeUSD);elUSD.className='change-pos';elBS.textContent='Bs '+dinero(changeBS);elBS.className='change-pos currency-bs';btn.disabled=false}
 }
 
 function processSale(){
   if(cart.length===0){showToast('Carrito vacío','warn');return}
-  const rates=getRates();
-  const rate=rates[selectedRate]||0;
-  const totalUSD=cartTotal();
-  const totalBS=totalUSD*rate;
+  const rates=getRates();const rate=rates[selectedRate]||0;const totalUSD=cartTotal();const totalBS=totalUSD*rate;
   const cashInput=parseFloat(document.getElementById('cash-received').value)||0;
   let cashUSD=0,cashBS=0;
   if(payCurrency==='USD'){cashUSD=cashInput;cashBS=cashInput*rate}else{cashBS=cashInput;cashUSD=cashInput/rate}
   if(cashUSD<totalUSD){showToast('Efectivo insuficiente','danger');vibrar([80,40,80]);return}
-  const prods=DB.getProducts();
-  const resp=JSON.stringify(prods);
+  const prods=DB.getProducts();const resp=JSON.stringify(prods);
   try{
     const items=[];
     for(const ln of cart){const p=prods.find(x=>x.id===ln.productId);if(!p)throw new Error('Stock insuficiente: '+ln.name);if(p.stock<ln.realQty)throw new Error('Stock insuficiente: '+p.name);p.stock-=ln.realQty;items.push({productId:p.id,name:p.name,qty:ln.qty,mode:ln.mode,unitPriceAtSale:ln.unitPrice,displayPriceAtSale:ln.displayPrice,realQty:ln.realQty,costPriceAtSale:p.costPrice||0})}
@@ -545,22 +613,16 @@ function processSale(){
 }
 
 function renderSales(){
-  const vts=DB.getSales();
-  const cont=document.getElementById('sales-list');
-  const res=document.getElementById('sales-summary');
-  const hoy=new Date().toDateString();
-  const vHoy=vts.filter(v=>new Date(v.date).toDateString()===hoy);
-  const tHoy=vHoy.reduce((s,v)=>s+(v.totalUSD||0),0);
-  const tHoyBs=vHoy.reduce((s,v)=>s+(v.totalBS||0),0);
+  const vts=DB.getSales();const cont=document.getElementById('sales-list');const res=document.getElementById('sales-summary');
+  const hoy=new Date().toDateString();const vHoy=vts.filter(v=>new Date(v.date).toDateString()===hoy);
+  const tHoy=vHoy.reduce((s,v)=>s+(v.totalUSD||0),0);const tHoyBs=vHoy.reduce((s,v)=>s+(v.totalBS||0),0);
   const ganHoy=vHoy.reduce((s,v)=>s+v.items.reduce((ss,i)=>ss+((i.displayPriceAtSale-(i.costPriceAtSale||0))*i.qty),0),0);
   res.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><div><div class="muted small">Vendido hoy (USD)</div><div style="font-size:1.6rem;font-weight:bold;color:var(--primary)">$'+dinero(tHoy)+'</div><div class="small" style="color:var(--accent);margin-top:4px">Ganancia: $'+dinero(ganHoy)+'</div></div><div style="text-align:right"><div class="muted small">Vendido hoy (Bs)</div><div style="font-size:1.6rem;font-weight:bold" class="currency-bs">Bs '+dinero(tHoyBs)+'</div><div class="muted small" style="margin-top:4px">'+vHoy.length+' ventas</div></div></div>';
   if(vts.length===0){cont.innerHTML='<div class="card"><p class="empty-msg">Todavía no hay ventas.</p></div>';return}
   cont.innerHTML=vts.map(v=>{
-    const f=new Date(v.date);
-    const fecha=f.toLocaleDateString()+' '+f.toLocaleTimeString('es-VE',{hour:'2-digit',minute:'2-digit'});
+    const f=new Date(v.date);const fecha=f.toLocaleDateString()+' '+f.toLocaleTimeString('es-VE',{hour:'2-digit',minute:'2-digit'});
     const its=v.items.map(i=>'<div class="muted small">'+i.qty+' '+(i.mode==='box'?'caja':'und')+' · '+textoSeguro(i.name)+' — $'+dinero(i.qty*i.displayPriceAtSale)+' <span style="color:var(--primary);font-size:.75rem">(gan $'+dinero((i.displayPriceAtSale-(i.costPriceAtSale||0))*i.qty)+')</span></div>').join('');
-    const rateLabel=v.rateType==='bcv'?'BCV':'Prom';
-    const gananciaTotal=v.items.reduce((s,i)=>s+((i.displayPriceAtSale-(i.costPriceAtSale||0))*i.qty),0);
+    const rateLabel=v.rateType==='bcv'?'BCV':'Prom';const gananciaTotal=v.items.reduce((s,i)=>s+((i.displayPriceAtSale-(i.costPriceAtSale||0))*i.qty),0);
     return'<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><strong class="small">'+fecha+'</strong><strong style="color:var(--primary)">$'+dinero(v.totalUSD)+'</strong></div><div class="small muted" style="margin-bottom:6px">Tasa '+rateLabel+': '+dinero(v.rateUsed)+' Bs/$ · Total Bs: <span class="currency-bs">'+dinero(v.totalBS)+'</span> · Pagó en '+v.payCurrency+'</div>'+its+'<div class="small" style="color:var(--accent);font-weight:600;margin-top:6px">💰 Ganancia total: $'+dinero(gananciaTotal)+'</div><div class="muted small" style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px">Efectivo $'+dinero(v.cashUSD)+' / Bs '+dinero(v.cashBS)+' · Cambio $'+dinero(v.changeUSD)+' / Bs '+dinero(v.changeBS)+'</div></div>';
   }).join('');
 }
@@ -574,7 +636,7 @@ async function scanFrame(){if(!isScanning||!videoStream)return;const vid=documen
 function handleScannedCode(code){const lim=String(code||'').trim();if(!lim)return;const p=DB.findProductByBarcode(lim);if(p){if(addToCart(p.id,1,false)){showToast('Agregado: '+p.name,'primary');switchView('view-pos')}}else{showToast('Código nuevo: regístralo','warn');vibrar([80,40,80]);stopScanner(true);switchView('view-inventory');openNewProductModal(lim)}}
 function handleManualScan(){const inp=document.getElementById('manual-barcode');const code=inp.value.trim();if(!code){showToast('Escribe un código','warn');return}handleScannedCode(code);inp.value=''}
 
-function exportBackup(){try{const data={app:'micro-pos',version:5,exportDate:new Date().toISOString(),products:DB.getProducts(),sales:DB.getSales(),rates:getRates()};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='respaldo_pos_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('Respaldo descargado','primary');vibrar(60)}catch(e){showToast('Error: '+e.message,'danger')}}
+function exportBackup(){try{const data={app:'pos-pro',version:6,exportDate:new Date().toISOString(),clientId:getClientId(),products:DB.getProducts(),sales:DB.getSales(),rates:getRates()};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='respaldo_pos_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('Respaldo descargado','primary');vibrar(60)}catch(e){showToast('Error: '+e.message,'danger')}}
 function importBackup(ev){const file=ev.target.files&&ev.target.files[0];if(!file)return;if(!confirm('Esto REEMPLAZA tu inventario, ventas y tasas. ¿Continuar?')){ev.target.value='';return}const reader=new FileReader();reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(!data||!Array.isArray(data.products))throw new Error('Archivo inválido');localStorage.setItem(KEY_PRODUCTS,JSON.stringify(data.products));localStorage.setItem(KEY_SALES,JSON.stringify(Array.isArray(data.sales)?data.sales:[]));if(data.rates)saveRatesToStorage(data.rates);cart=[];showToast('Datos restaurados','primary');vibrar([60,40,60]);setTimeout(()=>location.reload(),900)}catch(err){showToast('Error: '+err.message,'danger');vibrar([80,40,80])}};reader.onerror=()=>showToast('No se pudo leer','danger');reader.readAsText(file);ev.target.value=''}
 
 document.getElementById('prod-cost-box').addEventListener('input',updateCalcPreview);
@@ -582,15 +644,11 @@ document.getElementById('prod-units-per-box').addEventListener('input',updateCal
 document.getElementById('prod-margin-det').addEventListener('input',updateCalcPreview);
 document.getElementById('prod-margin-may').addEventListener('input',updateCalcPreview);
 
-function init(){try{seedData();initDetector();renderCart();renderInventory();renderSales();updateAlertBadge();document.getElementById('manual-barcode').addEventListener('keydown',e=>{if(e.key==='Enter')handleManualScan()});document.addEventListener('visibilitychange',()=>{if(document.hidden)stopScanner(true)})}catch(e){alert('Error al iniciar: '+e.message)}}
+function init(){try{seedData();initDetector();renderCart();renderInventory();renderSales();updateAlertBadge();updateLicenseStatusText();document.getElementById('manual-barcode').addEventListener('keydown',e=>{if(e.key==='Enter')handleManualScan()});document.addEventListener('visibilitychange',()=>{if(document.hidden)stopScanner(true)})}catch(e){alert('Error al iniciar: '+e.message)}}
 
-const storedPin=localStorage.getItem(KEY_PIN);
-if(!storedPin){
-  pinMode='create';
-  document.getElementById('pin-message').textContent='Crea tu PIN de 4 dígitos';
-}else{
-  pinMode='login';
-}
+(async function boot(){
+  try{await checkLicense(false);}catch(e){showPinOrApp();}
+})();
 </script>
 <script>
 if ('serviceWorker' in navigator) {
