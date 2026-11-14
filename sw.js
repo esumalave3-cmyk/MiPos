@@ -1,14 +1,11 @@
-const CACHE_NAME = 'mipos-v4-LICENCIA';
+const CACHE_NAME = 'mipos-v5-FINAL';
 const urlsToCache = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', function(event) {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(function(cache) {
-        console.log('Cache abierto:', CACHE_NAME);
-        return cache.addAll(urlsToCache);
-      })
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then(function(cache) {
+      return cache.addAll(urlsToCache);
+    }).then(() => self.skipWaiting())
   );
 });
 
@@ -19,7 +16,6 @@ self.addEventListener('activate', function(event) {
         cacheNames.filter(function(cacheName) {
           return cacheName !== CACHE_NAME;
         }).map(function(cacheName) {
-          console.log('Borrando caché viejo:', cacheName);
           return caches.delete(cacheName);
         })
       );
@@ -28,13 +24,13 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
+  if (event.request.url.indexOf('licencias.json') !== -1) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
   event.respondWith(
-    caches.match(event.request)
-      .then(function(response) {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      })
+    caches.match(event.request).then(function(response) {
+      return response || fetch(event.request);
+    })
   );
 });
