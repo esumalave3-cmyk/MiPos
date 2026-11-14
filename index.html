@@ -530,16 +530,10 @@ function updateCalcPreview(){
   const marginMay=parseFloat(document.getElementById('prod-margin-may').value)||0;
   const costUnit=upb>0?(costBox/upb):0;
   document.getElementById('calc-cost-unit').textContent=dinero(costUnit);
-  
-  // Fórmula de margen real sobre precio de venta
-  // Precio = Costo / (1 - Margen%)
-  // Protección: máximo 99.99% para evitar división por cero
   const mDet=Math.min(marginDet,99.99)/100;
   const mMay=Math.min(marginMay,99.99)/100;
-  
   const precioDet=costUnit/(1-mDet);
   const precioCaja=costBox/(1-mMay);
-  
   document.getElementById('calc-preview-det').textContent=dinero(precioDet);
   document.getElementById('calc-preview-may').textContent=dinero(precioCaja);
   document.getElementById('prod-unit-price').value=dinero(precioDet);
@@ -668,6 +662,7 @@ function renderCart(){
 function updateCartQty(idx,delta){const ln=cart[idx];if(!ln)return;if(delta>0){const ext=ln.mode==='box'?ln.unitsPerBox:1;const p=DB.findProductById(ln.productId);if(!p||unidadesEnCarrito(ln.productId)+ext>p.stock){showToast('Stock insuficiente','danger');vibrar([80,40,80]);return}ln.qty+=1;ln.realQty+=ext}else{ln.qty-=1;ln.realQty-=(ln.mode==='box'?ln.unitsPerBox:1);if(ln.qty<=0)cart.splice(idx,1)}renderCart()}
 function clearCart(){if(cart.length===0){showToast('Ya está vacío','warn');return}if(!confirm('¿Vaciar el carrito?'))return;cart=[];renderCart();showToast('Carrito vacío','primary')}
 
+// ===== FIX: Al abrir modal, botón deshabilitado para forzar elegir tipo de pago =====
 function setPayType(type){
   payType=type;
   document.getElementById('pay-contado').classList.toggle('active',type==='contado');
@@ -675,16 +670,35 @@ function setPayType(type){
   document.getElementById('credito-fields').style.display=type==='credito'?'block':'none';
   document.getElementById('cash-section').style.display=type==='contado'?'block':'none';
   document.getElementById('change-section').style.display=type==='contado'?'block':'none';
-  document.getElementById('btn-confirm-sale').disabled=(type==='credito')?false:true;
+  
   if(type==='credito'){
+    // En crédito: habilitar botón inmediatamente (no requiere efectivo)
     document.getElementById('cash-received').value='';
     document.getElementById('change-usd').textContent='$0.00';
     document.getElementById('change-bs').textContent='Bs 0.00';
+    document.getElementById('btn-confirm-sale').disabled=false;
+  }else{
+    // En contado: deshabilitar hasta que ingrese efectivo suficiente
+    document.getElementById('btn-confirm-sale').disabled=true;
+    calculateChange();
   }
 }
-function selectRate(rate){selectedRate=rate;document.querySelectorAll('.rate-option').forEach(el=>el.classList.remove('selected'));document.getElementById('rate-opt-'+rate).classList.add('selected');document.getElementById('rate-opt-'+rate).querySelector('input').checked=true;const rates=getRates();const totalUSD=cartTotal();const totalBS=redondear(totalUSD*(rates[rate]||0));document.getElementById('checkout-total-bs').textContent=dinero(totalBS);if(payType==='contado')calculateChange();renderCart()}
+
+function selectRate(rate){
+  selectedRate=rate;
+  document.querySelectorAll('.rate-option').forEach(el=>el.classList.remove('selected'));
+  document.getElementById('rate-opt-'+rate).classList.add('selected');
+  document.getElementById('rate-opt-'+rate).querySelector('input').checked=true;
+  const rates=getRates();
+  const totalUSD=cartTotal();
+  const totalBS=redondear(totalUSD*(rates[rate]||0));
+  document.getElementById('checkout-total-bs').textContent=dinero(totalBS);
+  if(payType==='contado')calculateChange();
+  renderCart();
+}
 function setPayCurrency(cur){payCurrency=cur;document.getElementById('pay-usd').className='btn btn-sm '+(cur==='USD'?'btn-primary':'btn-ghost');document.getElementById('pay-bs').className='btn btn-sm '+(cur==='BS'?'btn-primary':'btn-ghost');document.getElementById('cash-label').textContent='Efectivo recibido ('+(cur==='USD'?'USD $':'Bs')+')';calculateChange()}
 
+// ===== FIX: Modal abre con botón deshabilitado =====
 function openCheckoutModal(){
   if(cart.length===0){showToast('Carrito vacío','warn');return}
   const rates=getRates();
@@ -703,8 +717,9 @@ function openCheckoutModal(){
   payType='contado';payCurrency='USD';selectedRate='bcv';
   setPayType('contado');
   selectRate('bcv');setPayCurrency('USD');
+  // Botón deshabilitado al abrir - el usuario DEBE elegir tipo de pago
+  document.getElementById('btn-confirm-sale').disabled=true;
   openModal('checkout-modal');
-  setTimeout(()=>{if(payType==='contado')document.getElementById('cash-received').focus()},150);
 }
 
 function calculateChange(){
@@ -881,7 +896,7 @@ function toggleScanner(){if(!videoStream){startScanner();return}if(isScanning){i
 async function scanFrame(){if(!isScanning||!videoStream)return;const vid=document.getElementById('scanner-video');if(vid.readyState>=2){try{const enc=await barcodeDetector.detect(vid);if(enc&&enc.length>0){const code=String(enc[0].rawValue||'').trim();const ahora=Date.now();if(code&&(code!==lastCode||ahora-lastCodeTime>1500)){lastCode=code;lastCodeTime=ahora;vibrar(60);handleScannedCode(code);return}}}catch(e){}}requestAnimationFrame(scanFrame)}
 function handleScannedCode(code){const lim=String(code||'').trim();if(!lim)return;const p=DB.findProductByBarcode(lim);if(p){if(addToCart(p.id,1,false)){showToast('Agregado: '+p.name,'primary');switchView('view-pos')}}else{showToast('Código nuevo: regístralo','warn');vibrar([80,40,80]);stopScanner(true);switchView('view-inventory');openNewProductModal(lim)}}
 function handleManualScan(){const inp=document.getElementById('manual-barcode');const code=inp.value.trim();if(!code){showToast('Escribe un código','warn');return}handleScannedCode(code);inp.value=''}
-function exportBackup(){try{const data={app:'pos-pro',version:11,exportDate:new Date().toISOString(),clientId:getClientId(),products:DB.getProducts(),sales:DB.getSales(),cxc:DB.getCxC(),rates:getRates(),pin:localStorage.getItem(KEY_PIN)||null};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='respaldo_pos_'+getClientId()+'_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('Respaldo descargado (con CxC)','primary');vibrar(60)}catch(e){showToast('Error: '+e.message,'danger')}}
+function exportBackup(){try{const data={app:'pos-pro',version:12,exportDate:new Date().toISOString(),clientId:getClientId(),products:DB.getProducts(),sales:DB.getSales(),cxc:DB.getCxC(),rates:getRates(),pin:localStorage.getItem(KEY_PIN)||null};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='respaldo_pos_'+getClientId()+'_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('Respaldo descargado (con CxC)','primary');vibrar(60)}catch(e){showToast('Error: '+e.message,'danger')}}
 function importBackup(ev){const file=ev.target.files&&ev.target.files[0];if(!file)return;if(!confirm('Esto REEMPLAZA inventario, ventas, CxC, tasas e ID. ¿Continuar?')){ev.target.value='';return}const reader=new FileReader();reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(!data||!Array.isArray(data.products))throw new Error('Archivo inválido');localStorage.setItem(KEY_PRODUCTS,JSON.stringify(data.products));localStorage.setItem(KEY_SALES,JSON.stringify(Array.isArray(data.sales)?data.sales:[]));if(Array.isArray(data.cxc))localStorage.setItem(KEY_CXC,JSON.stringify(data.cxc));if(data.rates)saveRatesToStorage(data.rates);if(data.clientId)localStorage.setItem(KEY_CLIENT_ID,data.clientId);if(data.pin)localStorage.setItem(KEY_PIN,data.pin);cart=[];showToast('Datos restaurados','primary');vibrar([60,40,60]);setTimeout(()=>location.reload(),900)}catch(err){showToast('Error: '+err.message,'danger');vibrar([80,40,80])}};reader.onerror=()=>showToast('No se pudo leer','danger');reader.readAsText(file);ev.target.value=''}
 document.getElementById('prod-cost-box').addEventListener('input',updateCalcPreview);
 document.getElementById('prod-units-per-box').addEventListener('input',updateCalcPreview);
