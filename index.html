@@ -15,7 +15,8 @@ html,body{height:100%}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
 header{position:fixed;top:0;left:0;right:0;height:54px;background:var(--card);border-bottom:1px solid var(--border);padding:0 16px;display:flex;justify-content:space-between;align-items:center;z-index:100;box-shadow:var(--shadow)}
 header h1{font-size:1.15rem;font-weight:700;color:var(--accent)}
-.badge{background:var(--danger);color:#fff;font-size:.75rem;padding:4px 10px;border-radius:12px;font-weight:bold;display:none}
+.badge{background:var(--danger);color:#fff;font-size:.75rem;padding:4px 10px;border-radius:12px;font-weight:bold;display:none;cursor:pointer;user-select:none;transition:transform .15s}
+.badge:active{transform:scale(.95)}
 .badge.active{display:inline-block}
 main{position:fixed;top:54px;left:0;right:0;bottom:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:16px 16px 170px 16px;z-index:1}
 .view{display:none}.view.active{display:block}
@@ -99,6 +100,9 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
 .abono-item{background:var(--bg);border-radius:6px;padding:8px;margin-top:6px;font-size:.85rem}
 .tab-filter{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
 .tab-filter button{flex:1;min-width:100px}
+.danger-zone{border-top:2px solid var(--danger-light);margin-top:14px;padding-top:14px}
+.danger-zone-title{color:var(--danger);font-weight:700;font-size:.9rem;margin-bottom:8px}
+.boxes-label{font-size:.7rem;color:var(--muted);margin-top:4px;font-weight:600}
 </style>
 </head>
 <body>
@@ -144,7 +148,7 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
 </div>
 
 <div id="app-container" style="display:none">
-<header><h1 id="header-title">Punto de Venta</h1><span id="alert-badge" class="badge">0</span></header>
+<header><h1 id="header-title">Punto de Venta</h1><span id="alert-badge" class="badge" onclick="showAlerts()" title="Ver productos en alerta">0</span></header>
 <main>
   <div id="view-pos" class="view active">
     <div id="cart-container" class="card"></div>
@@ -161,6 +165,10 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
   </div>
   <div id="view-inventory" class="view">
     <input type="text" id="inventory-search" class="input" placeholder="🔍 Buscar por nombre o código..." oninput="renderInventory()" style="margin-bottom:12px">
+    <div class="tab-filter" style="margin-bottom:12px">
+      <button class="btn btn-sm btn-primary" id="filter-all" onclick="setInventoryFilter('all')">📦 Todos</button>
+      <button class="btn btn-sm btn-ghost" id="filter-alerts" onclick="setInventoryFilter('alerts')">⚠️ Solo alertas</button>
+    </div>
     <button class="btn btn-primary" style="margin-bottom:16px" onclick="openNewProductModal()">+ Nuevo Producto</button>
     <div id="inventory-list"></div>
     <div class="card backup-card" style="margin-top:20px">
@@ -169,6 +177,11 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
       <div class="flex-row" style="margin-bottom:8px;"><button class="btn btn-primary btn-sm" onclick="exportBackup()">⬇️ Exportar JSON</button><button class="btn btn-warn btn-sm" onclick="document.getElementById('import-file').click()">⬆️ Importar JSON</button></div>
       <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBackup(event)">
       <button class="btn btn-sm btn-ghost" style="width:100%; border:1px solid var(--primary); color:var(--primary)" onclick="exportInventoryCSV()">📊 Descargar Inventario en Excel</button>
+      <div class="danger-zone">
+        <div class="danger-zone-title">⚠️ Zona de peligro</div>
+        <button class="btn btn-sm btn-danger" style="width:100%" onclick="clearSalesHistory()">🗑️ Limpiar historial de ventas y deudas pagadas</button>
+        <p class="muted small" style="margin-top:6px;font-size:.75rem">Borra las ventas del historial y las deudas ya cobradas. Las deudas pendientes en CxC se mantienen. ⚠️ Descarga el respaldo JSON antes de usar esta opción.</p>
+      </div>
     </div>
     <div class="card config-card" style="margin-top:12px">
       <h3 style="margin-bottom:6px">⚙️ Configuración</h3>
@@ -249,7 +262,6 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
       <div class="rate-option selected" onclick="selectRate('bcv')" id="rate-opt-bcv"><input type="radio" name="rate" value="bcv" checked><div style="flex:1"><strong>Tasa BCV</strong><div class="muted small" id="rate-bcv-display">0.00 Bs/$</div></div></div>
       <div class="rate-option" onclick="selectRate('avg')" id="rate-opt-avg"><input type="radio" name="rate" value="avg"><div style="flex:1"><strong>Tasa Promedio</strong><div class="muted small" id="rate-avg-display">0.00 Bs/$</div></div></div>
     </div>
-    
     <div class="input-group" id="cash-section">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
         <label id="cash-label" style="margin-bottom:0;">Efectivo recibido</label>
@@ -260,7 +272,6 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
       </div>
       <input type="number" id="cash-received" class="input" placeholder="0.00" step="0.01" min="0" inputmode="decimal" oninput="calculateChange()" style="font-size:1.4rem;text-align:center">
     </div>
-
     <div class="card" style="text-align:center;font-size:1.2rem" id="change-section">
       <div class="rate-display"><span class="label">Cambio en USD:</span><strong id="change-usd" class="change-pos">$0.00</strong></div>
       <div class="rate-display"><span class="label">Cambio en Bs:</span><strong id="change-bs" class="change-pos currency-bs">Bs 0.00</strong></div>
@@ -386,6 +397,7 @@ function closeModal(id){try{const el=document.getElementById(id);if(el)el.classL
 let cart=[],videoStream=null,isScanning=false,barcodeDetector=null,lastCode='',lastCodeTime=0,selectedRate='bcv',payCurrency='USD',payType='contado';
 let pinInput='',pinMode='login',newPin='';
 let abonoCxcId=null,abonoCurrency='USD';
+let inventoryFilter='all';
 
 function pinPress(key){
   const error=document.getElementById('pin-error');
@@ -529,12 +541,45 @@ function updateLicenseStatusText(){
   if(el)el.textContent='Licencia: '+(status==='valid'?'✅ Activa hasta '+expire:status==='expired'?'⚠️ Vencida':'❓ Sin verificar');
 }
 function estadoStock(p){if(p.stock===0)return{pill:'pill-danger',edge:'edge-danger'};if(p.stock<=p.minStock)return{pill:'pill-warn',edge:'edge-warn'};return{pill:'pill-ok',edge:'edge-ok'}}
+
+function setInventoryFilter(f){
+  inventoryFilter=f;
+  renderInventory();
+}
+
+function showAlerts(){
+  inventoryFilter='alerts';
+  switchView('view-inventory');
+  showToast('Mostrando productos en alerta','warn');
+}
+
 function renderInventory(){
   try{
     const f=document.getElementById('inventory-search').value.toLowerCase().trim();
-    const prods=DB.getProducts().filter(p=>p.name.toLowerCase().includes(f)||String(p.barcode).includes(f)).sort((a,b)=>a.name.localeCompare(b.name));
+    
+    // Actualizar estado visual de los botones de filtro
+    const btnAll=document.getElementById('filter-all');
+    const btnAl=document.getElementById('filter-alerts');
+    if(btnAll) btnAll.className='btn btn-sm '+(inventoryFilter==='all'?'btn-primary':'btn-ghost');
+    if(btnAl) btnAl.className='btn btn-sm '+(inventoryFilter==='alerts'?'btn-primary':'btn-ghost');
+    
+    let prods=DB.getProducts().filter(p=>p.name.toLowerCase().includes(f)||String(p.barcode).includes(f)).sort((a,b)=>a.name.localeCompare(b.name));
+    
+    // Aplicar filtro de alertas si está activo
+    if(inventoryFilter==='alerts'){
+      prods=prods.filter(p=>p.stock<=p.minStock);
+    }
+    
     const cont=document.getElementById('inventory-list');
-    if(prods.length===0){cont.innerHTML='<div class="card"><p class="empty-msg">No hay productos. Toca "+ Nuevo Producto".</p></div>';updateAlertBadge();return}
+    if(prods.length===0){
+      const msg = inventoryFilter==='alerts' 
+        ? '✅ No hay productos en alerta. ¡Todo el inventario está bien!' 
+        : 'No hay productos. Toca "+ Nuevo Producto".';
+      cont.innerHTML='<div class="card"><p class="empty-msg">'+msg+'</p></div>';
+      updateAlertBadge();
+      return;
+    }
+    
     const rates=getRates();
     cont.innerHTML=prods.map(p=>{
       const est=estadoStock(p);
@@ -546,7 +591,15 @@ function renderInventory(){
       const ganMay=(p.boxPrice/p.unitsPerBox)-(p.costPrice||0);
       const margenTxt=p.costPrice?'<div style="margin-top:6px"><div class="small"><span style="color:var(--primary);font-weight:600">Detal:</span> costo $'+dinero(p.costPrice)+' + '+(p.marginDet||0)+'% = $'+dinero(p.unitPrice)+' (gan $'+dinero(ganDet)+')</div><div class="small"><span style="color:var(--accent);font-weight:600">Mayor:</span> caja $'+dinero(p.boxPrice)+' / '+p.unitsPerBox+'u + '+(p.marginMay||0)+'% = gan $'+dinero(ganMay)+'/u</div></div>':'';
       const stockWarning=!canSellBox&&p.unitsPerBox>1?'<div class="stock-warning">⚠️ Stock insuficiente para vender por caja (necesitas '+p.unitsPerBox+' u, tienes '+p.stock+' u)</div>':'';
-      return'<div class="card product-card '+est.edge+'"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><strong>'+textoSeguro(p.name)+'</strong><div class="muted small">'+textoSeguro(p.barcode)+' · '+textoSeguro(p.category||'Sin categoría')+'</div><div class="small" style="margin-top:4px">Unidad <strong class="currency-usd">$'+dinero(p.unitPrice)+'</strong> · <span class="currency-bs">Bs '+precioBsBCV+' (BCV)</span></div><div class="small muted">Caja <strong>$'+dinero(p.boxPrice)+'</strong> ('+p.unitsPerBox+' u) · <span class="currency-bs">Bs '+precioBsAvg+' (Prom)</span></div>'+margenTxt+stockWarning+'</div><span class="stock-pill '+est.pill+'">'+p.stock+' u</span></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"><button class="btn btn-sm btn-primary" onclick="sellFromInventory(\''+p.id+'\',false)">🛒 Unidad</button>'+btnCaja+'<button class="btn btn-sm btn-warn" onclick="openReceiveStockModal(\''+p.id+'\')">📥 Recibir</button><button class="btn btn-sm btn-ghost" onclick="openEditProductModal(\''+p.id+'\')">✏️ Editar</button></div></div>'
+      
+      // Cálculo de cajas disponibles
+      const boxes = Math.floor(p.stock / p.unitsPerBox);
+      const remainder = p.stock % p.unitsPerBox;
+      const boxesLabel = p.unitsPerBox > 1 
+        ? '📦 '+boxes+' caja'+(boxes!==1?'s':'')+(remainder>0?' + '+remainder+'u':'')
+        : '';
+      
+      return'<div class="card product-card '+est.edge+'"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><strong>'+textoSeguro(p.name)+'</strong><div class="muted small">'+textoSeguro(p.barcode)+' · '+textoSeguro(p.category||'Sin categoría')+'</div><div class="small" style="margin-top:4px">Unidad <strong class="currency-usd">$'+dinero(p.unitPrice)+'</strong> · <span class="currency-bs">Bs '+precioBsBCV+' (BCV)</span></div><div class="small muted">Caja <strong>$'+dinero(p.boxPrice)+'</strong> ('+p.unitsPerBox+' u) · <span class="currency-bs">Bs '+precioBsAvg+' (Prom)</span></div>'+margenTxt+stockWarning+'</div><div style="text-align:right;min-width:80px"><span class="stock-pill '+est.pill+'">'+p.stock+' u</span>'+(boxesLabel?'<div class="boxes-label">'+boxesLabel+'</div>':'')+'</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"><button class="btn btn-sm btn-primary" onclick="sellFromInventory(\''+p.id+'\',false)">🛒 Unidad</button>'+btnCaja+'<button class="btn btn-sm btn-warn" onclick="openReceiveStockModal(\''+p.id+'\')">📥 Recibir</button><button class="btn btn-sm btn-ghost" onclick="openEditProductModal(\''+p.id+'\')">✏️ Editar</button></div></div>'
     }).join('');
     updateAlertBadge();
   }catch(e){console.error('Error en renderInventory:',e)}
@@ -667,7 +720,6 @@ function addToCart(pid,qty,asBox){
   const up=asBox?(p.boxPrice/p.unitsPerBox):p.unitPrice;
   const pl=asBox?p.boxPrice:p.unitPrice;
   const md=asBox?'box':'unit';
-  // CORRECCIÓN BUG 1: Guardar el costo real de la caja o de la unidad para calcular bien la ganancia
   const itemCost = asBox ? (p.costBox || (p.costPrice * p.unitsPerBox) || 0) : (p.costPrice || 0);
   
   const ex=cart.find(l=>l.productId===pid&&l.mode===md);
@@ -748,7 +800,6 @@ function selectRate(rate){
   }catch(e){console.error('Error en selectRate:',e)}
 }
 
-// CORRECCIÓN BUG 2: Función para cambiar entre USD y BS en el cobro
 function setPayCurrency(cur){
   try{
     payCurrency=cur;
@@ -795,7 +846,7 @@ function openCheckoutModal(){
     payType='contado';payCurrency='USD';selectedRate='bcv';
     setPayType('contado');
     selectRate('bcv');
-    setPayCurrency('USD'); // Inicializar en USD
+    setPayCurrency('USD');
     if(btnConfirm)btnConfirm.disabled=true;
     
     openModal('checkout-modal');
@@ -828,7 +879,6 @@ function processSale(){
       if(!p)throw new Error('Producto no encontrado: '+ln.name);
       if(p.stock<ln.realQty)throw new Error('Stock insuficiente: '+p.name+' (quedan '+p.stock+' u, necesitas '+ln.realQty+' u)');
       p.stock-=ln.realQty;
-      // CORRECCIÓN BUG 1: Guardar el costo exacto de la unidad o caja vendida
       items.push({productId:p.id,name:p.name,qty:ln.qty,mode:ln.mode,unitPriceAtSale:ln.unitPrice,displayPriceAtSale:ln.displayPrice,realQty:ln.realQty,costPriceAtSale:ln.cost || 0});
     }
     const venta={id:uid('s_'),date:new Date().toISOString(),totalUSD:totalUSD,totalBS:totalBS,rateUsed:rate,rateType:selectedRate,payType:payType,items:items};
@@ -1002,10 +1052,9 @@ async function scanFrame(){if(!isScanning||!videoStream)return;const vid=documen
 function handleScannedCode(code){const lim=String(code||'').trim();if(!lim)return;const p=DB.findProductByBarcode(lim);if(p){if(addToCart(p.id,1,false)){showToast('Agregado: '+p.name,'primary');switchView('view-pos')}}else{showToast('Código nuevo: regístralo','warn');vibrar([80,40,80]);stopScanner(true);switchView('view-inventory');openNewProductModal(lim)}}
 function handleManualScan(){const inp=document.getElementById('manual-barcode');const code=inp.value.trim();if(!code){showToast('Escribe un código','warn');return}handleScannedCode(code);inp.value=''}
 
-// --- NUEVAS FUNCIONES PARA EXPORTAR A EXCEL (CSV) ---
 function descargarCSV(nombreArchivo, filas) {
   try {
-    let csvContent = "\uFEFF"; // BOM para que Excel reconozca los acentos
+    let csvContent = "\uFEFF";
     filas.forEach(fila => {
       const filaEscapada = fila.map(celda => {
         let texto = String(celda == null ? '' : celda);
@@ -1013,7 +1062,6 @@ function descargarCSV(nombreArchivo, filas) {
       }).join(",");
       csvContent += filaEscapada + "\r\n";
     });
-    
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -1033,11 +1081,9 @@ function descargarCSV(nombreArchivo, filas) {
 function exportInventoryCSV() {
   const prods = DB.getProducts();
   if (prods.length === 0) { showToast('No hay productos', 'warn'); return; }
-  
   const filas = [
     ["Código", "Nombre", "Categoría", "Precio Unidad (USD)", "Precio Caja (USD)", "Stock (Unidades)", "Stock Mínimo", "Costo Unitario (USD)"]
   ];
-  
   prods.forEach(p => {
     filas.push([
       p.barcode, p.name, p.category || '', 
@@ -1045,44 +1091,37 @@ function exportInventoryCSV() {
       p.stock, p.minStock, dinero(p.costPrice || 0)
     ]);
   });
-  
   descargarCSV("Inventario", filas);
 }
 
 function exportSalesCSV() {
   const ventas = DB.getSales();
   if (ventas.length === 0) { showToast('No hay ventas registradas', 'warn'); return; }
-  
   const filas = [
     ["Fecha", "Hora", "Total USD", "Total Bs", "Tasa BCV/Prom", "Tipo de Pago", "Cliente", "Ganancia Estimada (USD)"]
   ];
-  
   ventas.forEach(v => {
     const f = new Date(v.date);
     const fecha = f.toLocaleDateString();
     const hora = f.toLocaleTimeString('es-VE', {hour:'2-digit',minute:'2-digit'});
     const ganancia = v.items.reduce((s,i) => s + ((i.displayPriceAtSale - (i.costPriceAtSale||0)) * i.qty), 0);
     const tipoPago = v.payType === 'credito' ? 'Crédito' : 'Contado';
-    
     filas.push([
       fecha, hora, dinero(v.totalUSD), dinero(v.totalBS), 
       dinero(v.rateUsed), tipoPago, v.cliente || '', dinero(ganancia)
     ]);
   });
-  
   descargarCSV("Ventas", filas);
 }
 
 function exportCxC_CSV() {
   const cxc = DB.getCxC();
   if (cxc.length === 0) { showToast('No hay cuentas por cobrar', 'warn'); return; }
-  
   const rates = getRates();
   const tasaHoy = rates.bcv || 0;
   const filas = [
     ["Cliente", "Cédula", "Teléfono", "Fecha Venta", "Total Original (USD)", "Total Pagado (USD)", "Saldo Pendiente (USD)", "Saldo en Bs (Hoy)", "Estado"]
   ];
-  
   cxc.forEach(c => {
     const f = new Date(c.fechaVenta).toLocaleDateString();
     const saldoBs = redondear(c.saldoUSD * tasaHoy);
@@ -1092,22 +1131,8 @@ function exportCxC_CSV() {
       dinero(saldoBs), c.estado === 'pagado' ? 'Pagado' : 'Pendiente'
     ]);
   });
-  
   descargarCSV("CuentasPorCobrar", filas);
 }
-// --- FIN DE FUNCIONES CSV ---
 
 function exportBackup(){try{const data={app:'pos-pro',version:12,exportDate:new Date().toISOString(),clientId:getClientId(),products:DB.getProducts(),sales:DB.getSales(),cxc:DB.getCxC(),rates:getRates(),pin:localStorage.getItem(KEY_PIN)||null};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='respaldo_pos_'+getClientId()+'_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('Respaldo descargado (con CxC)','primary');vibrar(60)}catch(e){showToast('Error: '+e.message,'danger')}}
-function importBackup(ev){const file=ev.target.files&&ev.target.files[0];if(!file)return;if(!confirm('Esto REEMPLAZA inventario, ventas, CxC, tasas e ID. ¿Continuar?')){ev.target.value='';return}const reader=new FileReader();reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(!data||!Array.isArray(data.products))throw new Error('Archivo inválido');localStorage.setItem(KEY_PRODUCTS,JSON.stringify(data.products));localStorage.setItem(KEY_SALES,JSON.stringify(Array.isArray(data.sales)?data.sales:[]));if(Array.isArray(data.cxc))localStorage.setItem(KEY_CXC,JSON.stringify(data.cxc));if(data.rates)saveRatesToStorage(data.rates);if(data.clientId)localStorage.setItem(KEY_CLIENT_ID,data.clientId);if(data.pin)localStorage.setItem(KEY_PIN,data.pin);cart=[];showToast('Datos restaurados','primary');vibrar([60,40,60]);setTimeout(()=>location.reload(),900)}catch(err){showToast('Error: '+err.message,'danger');vibrar([80,40,80])}};reader.onerror=()=>showToast('No se pudo leer','danger');reader.readAsText(file);ev.target.value=''}
-document.getElementById('prod-cost-box').addEventListener('input',updateCalcPreview);
-document.getElementById('prod-units-per-box').addEventListener('input',updateCalcPreview);
-document.getElementById('prod-margin-det').addEventListener('input',updateCalcPreview);
-document.getElementById('prod-margin-may').addEventListener('input',updateCalcPreview);
-function init(){try{seedData();initDetector();renderCart();renderInventory();renderSales();updateAlertBadge();updateLicenseStatusText();document.getElementById('app-client-id').textContent=getClientId();document.getElementById('manual-barcode').addEventListener('keydown',e=>{if(e.key==='Enter')handleManualScan()});document.addEventListener('visibilitychange',()=>{if(document.hidden)stopScanner(true)})}catch(e){alert('Error: '+e.message)}}
-(async function boot(){try{await checkLicense(false)}catch(e){showPinOrApp()}})();
-</script>
-<script>
-if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
-</script>
-</body>
-</html>
+function importBackup(ev){const file=ev.target.files&&ev.target.files[0];if(!file)return;if(!confirm('Esto REEMPLAZA inventario, ventas, CxC, tasas e ID. ¿Continuar?')){ev.target.value='';return}const reader=new FileReader();reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(!data||!Array.isArray(data.products))throw new Error('Archivo inválido');localStorage.setItem(KEY_PRODUCTS,JSON.stringify(data.products));localStorage.setItem(KEY_SALES,JSON.stringify(Array.isArray(data.sales)?data.sales:[]));if(Array.isArray(data.cxc))localStorage.setItem(KEY_CXC,JSON.stringify(data.cxc));if(data.rates)saveRatesToStorage(data.rates);if(data.clientId)localStorage.setItem(KEY_CLIENT_ID,data.clientId);if(data.pin)localStorage.setItem(KEY_PIN,data.pin);cart=[];showToast('Datos restau
