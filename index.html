@@ -556,30 +556,19 @@ function showAlerts(){
 function renderInventory(){
   try{
     const f=document.getElementById('inventory-search').value.toLowerCase().trim();
-    
-    // Actualizar estado visual de los botones de filtro
     const btnAll=document.getElementById('filter-all');
     const btnAl=document.getElementById('filter-alerts');
     if(btnAll) btnAll.className='btn btn-sm '+(inventoryFilter==='all'?'btn-primary':'btn-ghost');
     if(btnAl) btnAl.className='btn btn-sm '+(inventoryFilter==='alerts'?'btn-primary':'btn-ghost');
-    
     let prods=DB.getProducts().filter(p=>p.name.toLowerCase().includes(f)||String(p.barcode).includes(f)).sort((a,b)=>a.name.localeCompare(b.name));
-    
-    // Aplicar filtro de alertas si está activo
-    if(inventoryFilter==='alerts'){
-      prods=prods.filter(p=>p.stock<=p.minStock);
-    }
-    
+    if(inventoryFilter==='alerts'){prods=prods.filter(p=>p.stock<=p.minStock);}
     const cont=document.getElementById('inventory-list');
     if(prods.length===0){
-      const msg = inventoryFilter==='alerts' 
-        ? '✅ No hay productos en alerta. ¡Todo el inventario está bien!' 
-        : 'No hay productos. Toca "+ Nuevo Producto".';
+      const msg = inventoryFilter==='alerts' ? '✅ No hay productos en alerta. ¡Todo el inventario está bien!' : 'No hay productos. Toca "+ Nuevo Producto".';
       cont.innerHTML='<div class="card"><p class="empty-msg">'+msg+'</p></div>';
       updateAlertBadge();
       return;
     }
-    
     const rates=getRates();
     cont.innerHTML=prods.map(p=>{
       const est=estadoStock(p);
@@ -591,14 +580,9 @@ function renderInventory(){
       const ganMay=(p.boxPrice/p.unitsPerBox)-(p.costPrice||0);
       const margenTxt=p.costPrice?'<div style="margin-top:6px"><div class="small"><span style="color:var(--primary);font-weight:600">Detal:</span> costo $'+dinero(p.costPrice)+' + '+(p.marginDet||0)+'% = $'+dinero(p.unitPrice)+' (gan $'+dinero(ganDet)+')</div><div class="small"><span style="color:var(--accent);font-weight:600">Mayor:</span> caja $'+dinero(p.boxPrice)+' / '+p.unitsPerBox+'u + '+(p.marginMay||0)+'% = gan $'+dinero(ganMay)+'/u</div></div>':'';
       const stockWarning=!canSellBox&&p.unitsPerBox>1?'<div class="stock-warning">⚠️ Stock insuficiente para vender por caja (necesitas '+p.unitsPerBox+' u, tienes '+p.stock+' u)</div>':'';
-      
-      // Cálculo de cajas disponibles
       const boxes = Math.floor(p.stock / p.unitsPerBox);
       const remainder = p.stock % p.unitsPerBox;
-      const boxesLabel = p.unitsPerBox > 1 
-        ? '📦 '+boxes+' caja'+(boxes!==1?'s':'')+(remainder>0?' + '+remainder+'u':'')
-        : '';
-      
+      const boxesLabel = p.unitsPerBox > 1 ? '📦 '+boxes+' caja'+(boxes!==1?'s':'')+(remainder>0?' + '+remainder+'u':'') : '';
       return'<div class="card product-card '+est.edge+'"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><strong>'+textoSeguro(p.name)+'</strong><div class="muted small">'+textoSeguro(p.barcode)+' · '+textoSeguro(p.category||'Sin categoría')+'</div><div class="small" style="margin-top:4px">Unidad <strong class="currency-usd">$'+dinero(p.unitPrice)+'</strong> · <span class="currency-bs">Bs '+precioBsBCV+' (BCV)</span></div><div class="small muted">Caja <strong>$'+dinero(p.boxPrice)+'</strong> ('+p.unitsPerBox+' u) · <span class="currency-bs">Bs '+precioBsAvg+' (Prom)</span></div>'+margenTxt+stockWarning+'</div><div style="text-align:right;min-width:80px"><span class="stock-pill '+est.pill+'">'+p.stock+' u</span>'+(boxesLabel?'<div class="boxes-label">'+boxesLabel+'</div>':'')+'</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"><button class="btn btn-sm btn-primary" onclick="sellFromInventory(\''+p.id+'\',false)">🛒 Unidad</button>'+btnCaja+'<button class="btn btn-sm btn-warn" onclick="openReceiveStockModal(\''+p.id+'\')">📥 Recibir</button><button class="btn btn-sm btn-ghost" onclick="openEditProductModal(\''+p.id+'\')">✏️ Editar</button></div></div>'
     }).join('');
     updateAlertBadge();
@@ -707,21 +691,12 @@ function addToCart(pid,qty,asBox){
   const cant=Math.max(1,parseInt(qty,10)||1);
   const real=asBox?cant*p.unitsPerBox:cant;
   if(p.stock<=0){showToast('Sin stock: '+p.name,'danger');vibrar([80,40,80]);return false}
-  if(asBox&&p.stock<p.unitsPerBox){
-    showToast('Stock insuficiente para 1 caja: necesitas '+p.unitsPerBox+' u, tienes '+p.stock+' u','danger');
-    vibrar([80,40,80]);
-    return false;
-  }
-  if(unidadesEnCarrito(pid)+real>p.stock){
-    showToast('Stock insuficiente: quedan '+p.stock+' u','danger');
-    vibrar([80,40,80]);
-    return false;
-  }
+  if(asBox&&p.stock<p.unitsPerBox){showToast('Stock insuficiente para 1 caja: necesitas '+p.unitsPerBox+' u, tienes '+p.stock+' u','danger');vibrar([80,40,80]);return false}
+  if(unidadesEnCarrito(pid)+real>p.stock){showToast('Stock insuficiente: quedan '+p.stock+' u','danger');vibrar([80,40,80]);return false}
   const up=asBox?(p.boxPrice/p.unitsPerBox):p.unitPrice;
   const pl=asBox?p.boxPrice:p.unitPrice;
   const md=asBox?'box':'unit';
   const itemCost = asBox ? (p.costBox || (p.costPrice * p.unitsPerBox) || 0) : (p.costPrice || 0);
-  
   const ex=cart.find(l=>l.productId===pid&&l.mode===md);
   if(ex){ex.qty+=cant;ex.realQty+=real}else{cart.push({productId:p.id,name:p.name,qty:cant,realQty:real,unitPrice:up,displayPrice:pl,mode:md,unitsPerBox:p.unitsPerBox,cost:itemCost})}
   renderCart();
@@ -762,13 +737,11 @@ function setPayType(type){
     const cashSection=document.getElementById('cash-section');
     const changeSection=document.getElementById('change-section');
     const btnConfirm=document.getElementById('btn-confirm-sale');
-    
     if(btnContado)btnContado.classList.toggle('active',type==='contado');
     if(btnCredito)btnCredito.classList.toggle('active',type==='credito');
     if(creditoFields)creditoFields.style.display=type==='credito'?'block':'none';
     if(cashSection)cashSection.style.display=type==='contado'?'block':'none';
     if(changeSection)changeSection.style.display=type==='contado'?'block':'none';
-    
     if(type==='credito'){
       const cashReceived=document.getElementById('cash-received');
       const changeUsd=document.getElementById('change-usd');
@@ -819,7 +792,6 @@ function openCheckoutModal(){
     const rates=getRates();
     const totalUSD=cartTotal();
     const totalBS=redondear(totalUSD*(rates[selectedRate]||rates.bcv||0));
-    
     const elTotal=document.getElementById('checkout-total');
     const elTotalBs=document.getElementById('checkout-total-bs');
     const elRateBcv=document.getElementById('rate-bcv-display');
@@ -831,7 +803,6 @@ function openCheckoutModal(){
     const elTel=document.getElementById('cxc-telefono');
     const elCed=document.getElementById('cxc-cedula');
     const btnConfirm=document.getElementById('btn-confirm-sale');
-    
     if(elTotal)elTotal.textContent=dinero(totalUSD);
     if(elTotalBs)elTotalBs.textContent=dinero(totalBS);
     if(elRateBcv)elRateBcv.textContent=dinero(rates.bcv)+' Bs/$';
@@ -842,18 +813,13 @@ function openCheckoutModal(){
     if(elCliente)elCliente.value='';
     if(elTel)elTel.value='';
     if(elCed)elCed.value='';
-    
     payType='contado';payCurrency='USD';selectedRate='bcv';
     setPayType('contado');
     selectRate('bcv');
     setPayCurrency('USD');
     if(btnConfirm)btnConfirm.disabled=true;
-    
     openModal('checkout-modal');
-  }catch(e){
-    console.error('Error en openCheckoutModal:',e);
-    showToast('Error: '+e.message,'danger');
-  }
+  }catch(e){console.error('Error en openCheckoutModal:',e);showToast('Error: '+e.message,'danger');}
 }
 
 function calculateChange(){
@@ -882,7 +848,6 @@ function processSale(){
       items.push({productId:p.id,name:p.name,qty:ln.qty,mode:ln.mode,unitPriceAtSale:ln.unitPrice,displayPriceAtSale:ln.displayPrice,realQty:ln.realQty,costPriceAtSale:ln.cost || 0});
     }
     const venta={id:uid('s_'),date:new Date().toISOString(),totalUSD:totalUSD,totalBS:totalBS,rateUsed:rate,rateType:selectedRate,payType:payType,items:items};
-    
     if(payType==='contado'){
       const cashInput=parseFloat(document.getElementById('cash-received').value)||0;
       let cashUSD=0,cashBS=0;
@@ -901,11 +866,7 @@ function processSale(){
       DB.addCxC(cxc);
       cart=[];renderCart();updateAlertBadge();closeModal('checkout-modal');showToast('Venta a crédito registrada: $'+dinero(totalUSD),'primary');vibrar(60);switchView('view-cxc');
     }
-  }catch(e){
-    console.error('Error en processSale:',e);
-    showToast('Error: '+e.message,'danger');
-    vibrar([80,40,80]);
-  }
+  }catch(e){console.error('Error en processSale:',e);showToast('Error: '+e.message,'danger');vibrar([80,40,80]);}
 }
 function renderSales(){
   try{
@@ -933,17 +894,13 @@ function renderCxC(filter='pendientes'){
     const tasaHoy=rates[selectedRate]||rates.bcv||0;
     const summary=document.getElementById('cxc-summary');
     const cont=document.getElementById('cxc-list');
-    
     const pendientes=cxc.filter(c=>c.estado==='pendiente');
     const pagados=cxc.filter(c=>c.estado==='pagado');
     const totalPendienteUSD=pendientes.reduce((s,c)=>s+c.saldoUSD,0);
     const totalPendienteBS=redondear(totalPendienteUSD*tasaHoy);
-    
     summary.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><div><div class="muted small">Total por cobrar</div><div style="font-size:1.6rem;font-weight:bold;color:var(--warn)">$'+dinero(totalPendienteUSD)+'</div><div class="small currency-bs">Bs '+dinero(totalPendienteBS)+' (tasa hoy: '+dinero(tasaHoy)+')</div></div><div style="text-align:right"><div class="muted small">Deudores activos</div><div style="font-size:1.6rem;font-weight:bold">'+pendientes.length+'</div><div class="muted small" style="margin-top:4px">'+pagados.length+' pagados</div></div></div>';
-    
     let lista=filter==='pendientes'?pendientes:filter==='pagados'?pagados:cxc;
     if(lista.length===0){cont.innerHTML='<div class="card"><p class="empty-msg">No hay registros '+(filter==='pendientes'?'pendientes':filter==='pagados'?'pagados':'')+'.</p></div>';return}
-    
     cont.innerHTML=lista.map(c=>{
       const saldoBs=redondear(c.saldoUSD*tasaHoy);
       const f=new Date(c.fechaVenta);
@@ -1081,15 +1038,9 @@ function descargarCSV(nombreArchivo, filas) {
 function exportInventoryCSV() {
   const prods = DB.getProducts();
   if (prods.length === 0) { showToast('No hay productos', 'warn'); return; }
-  const filas = [
-    ["Código", "Nombre", "Categoría", "Precio Unidad (USD)", "Precio Caja (USD)", "Stock (Unidades)", "Stock Mínimo", "Costo Unitario (USD)"]
-  ];
+  const filas = [["Código", "Nombre", "Categoría", "Precio Unidad (USD)", "Precio Caja (USD)", "Stock (Unidades)", "Stock Mínimo", "Costo Unitario (USD)"]];
   prods.forEach(p => {
-    filas.push([
-      p.barcode, p.name, p.category || '', 
-      dinero(p.unitPrice), dinero(p.boxPrice), 
-      p.stock, p.minStock, dinero(p.costPrice || 0)
-    ]);
+    filas.push([p.barcode, p.name, p.category || '', dinero(p.unitPrice), dinero(p.boxPrice), p.stock, p.minStock, dinero(p.costPrice || 0)]);
   });
   descargarCSV("Inventario", filas);
 }
@@ -1097,19 +1048,14 @@ function exportInventoryCSV() {
 function exportSalesCSV() {
   const ventas = DB.getSales();
   if (ventas.length === 0) { showToast('No hay ventas registradas', 'warn'); return; }
-  const filas = [
-    ["Fecha", "Hora", "Total USD", "Total Bs", "Tasa BCV/Prom", "Tipo de Pago", "Cliente", "Ganancia Estimada (USD)"]
-  ];
+  const filas = [["Fecha", "Hora", "Total USD", "Total Bs", "Tasa BCV/Prom", "Tipo de Pago", "Cliente", "Ganancia Estimada (USD)"]];
   ventas.forEach(v => {
     const f = new Date(v.date);
     const fecha = f.toLocaleDateString();
     const hora = f.toLocaleTimeString('es-VE', {hour:'2-digit',minute:'2-digit'});
     const ganancia = v.items.reduce((s,i) => s + ((i.displayPriceAtSale - (i.costPriceAtSale||0)) * i.qty), 0);
     const tipoPago = v.payType === 'credito' ? 'Crédito' : 'Contado';
-    filas.push([
-      fecha, hora, dinero(v.totalUSD), dinero(v.totalBS), 
-      dinero(v.rateUsed), tipoPago, v.cliente || '', dinero(ganancia)
-    ]);
+    filas.push([fecha, hora, dinero(v.totalUSD), dinero(v.totalBS), dinero(v.rateUsed), tipoPago, v.cliente || '', dinero(ganancia)]);
   });
   descargarCSV("Ventas", filas);
 }
@@ -1119,20 +1065,88 @@ function exportCxC_CSV() {
   if (cxc.length === 0) { showToast('No hay cuentas por cobrar', 'warn'); return; }
   const rates = getRates();
   const tasaHoy = rates.bcv || 0;
-  const filas = [
-    ["Cliente", "Cédula", "Teléfono", "Fecha Venta", "Total Original (USD)", "Total Pagado (USD)", "Saldo Pendiente (USD)", "Saldo en Bs (Hoy)", "Estado"]
-  ];
+  const filas = [["Cliente", "Cédula", "Teléfono", "Fecha Venta", "Total Original (USD)", "Total Pagado (USD)", "Saldo Pendiente (USD)", "Saldo en Bs (Hoy)", "Estado"]];
   cxc.forEach(c => {
     const f = new Date(c.fechaVenta).toLocaleDateString();
     const saldoBs = redondear(c.saldoUSD * tasaHoy);
-    filas.push([
-      c.cliente, c.cedula || '', c.telefono || '', f,
-      dinero(c.totalUSD), dinero(c.pagadoUSD), dinero(c.saldoUSD), 
-      dinero(saldoBs), c.estado === 'pagado' ? 'Pagado' : 'Pendiente'
-    ]);
+    filas.push([c.cliente, c.cedula || '', c.telefono || '', f, dinero(c.totalUSD), dinero(c.pagadoUSD), dinero(c.saldoUSD), dinero(saldoBs), c.estado === 'pagado' ? 'Pagado' : 'Pendiente']);
   });
   descargarCSV("CuentasPorCobrar", filas);
 }
 
-function exportBackup(){try{const data={app:'pos-pro',version:12,exportDate:new Date().toISOString(),clientId:getClientId(),products:DB.getProducts(),sales:DB.getSales(),cxc:DB.getCxC(),rates:getRates(),pin:localStorage.getItem(KEY_PIN)||null};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='respaldo_pos_'+getClientId()+'_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('Respaldo descargado (con CxC)','primary');vibrar(60)}catch(e){showToast('Error: '+e.message,'danger')}}
-function importBackup(ev){const file=ev.target.files&&ev.target.files[0];if(!file)return;if(!confirm('Esto REEMPLAZA inventario, ventas, CxC, tasas e ID. ¿Continuar?')){ev.target.value='';return}const reader=new FileReader();reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(!data||!Array.isArray(data.products))throw new Error('Archivo inválido');localStorage.setItem(KEY_PRODUCTS,JSON.stringify(data.products));localStorage.setItem(KEY_SALES,JSON.stringify(Array.isArray(data.sales)?data.sales:[]));if(Array.isArray(data.cxc))localStorage.setItem(KEY_CXC,JSON.stringify(data.cxc));if(data.rates)saveRatesToStorage(data.rates);if(data.clientId)localStorage.setItem(KEY_CLIENT_ID,data.clientId);if(data.pin)localStorage.setItem(KEY_PIN,data.pin);cart=[];showToast('Datos restau
+function exportBackup(){try{const data={app:'pos-pro',version:13,exportDate:new Date().toISOString(),clientId:getClientId(),products:DB.getProducts(),sales:DB.getSales(),cxc:DB.getCxC(),rates:getRates(),pin:localStorage.getItem(KEY_PIN)||null};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='respaldo_pos_'+getClientId()+'_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('Respaldo descargado (con CxC)','primary');vibrar(60)}catch(e){showToast('Error: '+e.message,'danger')}}
+
+function importBackup(ev){
+  const file=ev.target.files&&ev.target.files[0];
+  if(!file)return;
+  if(!confirm('Esto REEMPLAZA inventario, ventas, CxC, tasas e ID. ¿Continuar?')){ev.target.value='';return}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!data||!Array.isArray(data.products))throw new Error('Archivo inválido');
+      localStorage.setItem(KEY_PRODUCTS,JSON.stringify(data.products));
+      localStorage.setItem(KEY_SALES,JSON.stringify(Array.isArray(data.sales)?data.sales:[]));
+      if(Array.isArray(data.cxc))localStorage.setItem(KEY_CXC,JSON.stringify(data.cxc));
+      if(data.rates)saveRatesToStorage(data.rates);
+      if(data.clientId)localStorage.setItem(KEY_CLIENT_ID,data.clientId);
+      if(data.pin)localStorage.setItem(KEY_PIN,data.pin);
+      cart=[];
+      showToast('Datos restaurados','primary');
+      vibrar([60,40,60]);
+      setTimeout(()=>location.reload(),900);
+    }catch(err){
+      showToast('Error: '+err.message,'danger');
+      vibrar([80,40,80]);
+    }
+  };
+  reader.onerror=()=>showToast('No se pudo leer','danger');
+  reader.readAsText(file);
+  ev.target.value='';
+}
+
+function clearSalesHistory(){
+  const ventas=DB.getSales();
+  const cxc=DB.getCxC();
+  const pagadas=cxc.filter(c=>c.estado==='pagado');
+  if(ventas.length===0 && pagadas.length===0){showToast('No hay historial para limpiar','warn');return}
+  const msg='⚠️ ATENCIÓN ⚠️\n\nSe van a eliminar:\n• '+ventas.length+' ventas del historial\n• '+pagadas.length+' deudas ya cobradas\n\nSe MANTIENEN:\n• Inventario de productos\n• Deudas pendientes en CxC\n• Tasas y configuración\n\n¿Ya descargaste tu respaldo JSON?\n\nPresiona OK para continuar o Cancelar para abortar.';
+  if(!confirm(msg)){return}
+  if(!confirm('🔴 ÚLTIMA CONFIRMACIÓN 🔴\n\n¿Estás SEGURO? Esta acción NO se puede deshacer sin un respaldo.')){return}
+  DB.saveSales([]);
+  const cxcNuevas=cxc.filter(c=>c.estado!=='pagado');
+  DB.saveCxC(cxcNuevas);
+  showToast('Historial limpiado correctamente','primary');
+  vibrar([60,40,60]);
+  renderSales();
+  renderCxC('pendientes');
+  switchView('view-inventory');
+}
+
+document.getElementById('prod-cost-box').addEventListener('input',updateCalcPreview);
+document.getElementById('prod-units-per-box').addEventListener('input',updateCalcPreview);
+document.getElementById('prod-margin-det').addEventListener('input',updateCalcPreview);
+document.getElementById('prod-margin-may').addEventListener('input',updateCalcPreview);
+
+function init(){
+  try{
+    seedData();
+    initDetector();
+    renderCart();
+    renderInventory();
+    renderSales();
+    updateAlertBadge();
+    updateLicenseStatusText();
+    document.getElementById('app-client-id').textContent=getClientId();
+    document.getElementById('manual-barcode').addEventListener('keydown',e=>{if(e.key==='Enter')handleManualScan()});
+    document.addEventListener('visibilitychange',()=>{if(document.hidden)stopScanner(true)});
+  }catch(e){alert('Error: '+e.message)}
+}
+
+(async function boot(){try{await checkLicense(false)}catch(e){showPinOrApp()}})();
+</script>
+<script>
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
+</script>
+</body>
+</html>
