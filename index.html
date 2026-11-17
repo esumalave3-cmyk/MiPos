@@ -3,128 +3,282 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#3182ce">
+<meta name="theme-color" content="#0f172a">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="apple-touch-icon" href="icon.svg">
-<title>Sistema POS Pro - Gestión de Ventas</title>
+<title>Sistema POS Pro</title>
+<!-- Google Fonts: Inter para un look Clean Tech -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f5f7fa;--card:#ffffff;--border:#e2e8f0;--text:#1a202c;--muted:#718096;--primary:#38a169;--primary-light:#c6f6d5;--danger:#e53e3e;--danger-light:#fed7d7;--warn:#d69e2e;--warn-light:#fefcbf;--accent:#3182ce;--accent-light:#bee3f8;--shadow:0 2px 8px rgba(0,0,0,.08);--safe-bottom:env(safe-area-inset-bottom,0px)}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
-header{position:fixed;top:0;left:0;right:0;height:54px;background:var(--card);border-bottom:1px solid var(--border);padding:0 16px;display:flex;justify-content:space-between;align-items:center;z-index:100;box-shadow:var(--shadow)}
-header h1{font-size:1.15rem;font-weight:700;color:var(--accent)}
-.badge{background:var(--danger);color:#fff;font-size:.75rem;padding:4px 10px;border-radius:12px;font-weight:bold;display:none;cursor:pointer;user-select:none;transition:transform .15s}
-.badge:active{transform:scale(.95)}
-.badge.active{display:inline-block}
-main{position:fixed;top:54px;left:0;right:0;bottom:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:16px 16px 170px 16px;z-index:1}
-.view{display:none}.view.active{display:block}
-.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow)}
-.btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:12px 14px;font-size:1rem;font-weight:600;cursor:pointer;min-height:44px;width:100%;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
-.btn:active{transform:scale(.97)}.btn:disabled{opacity:.45;cursor:not-allowed}
-.btn-primary{background:var(--primary)}.btn-danger{background:var(--danger)}.btn-warn{background:var(--warn);color:#1a202c}.btn-ghost{background:var(--bg);border:1px solid var(--border);color:var(--text)}.btn-sm{padding:10px 12px;font-size:.88rem;min-height:40px;width:auto}
-.input-group{margin-bottom:12px}.input-group label{display:block;color:var(--muted);font-size:.85rem;margin-bottom:4px;font-weight:500}
-.input{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:12px;border-radius:8px;font-size:1rem;min-height:44px}
-.input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)}
-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding-bottom:var(--safe-bottom);z-index:110;box-shadow:0 -2px 8px rgba(0,0,0,.06)}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0;color:var(--muted);font-size:.72rem;cursor:pointer;min-height:56px;transition:all .15s}
-.nav-item.active{color:var(--accent);font-weight:600}.nav-item span{font-size:1.4rem;margin-bottom:2px}
-.cart-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}.cart-item:last-child{border-bottom:none}
-.cart-controls{display:flex;align-items:center;gap:6px}.cart-controls button{width:40px;height:40px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:1.3rem;font-weight:bold}
-.total-bar{position:fixed;bottom:57px;left:0;right:0;background:var(--card);border-top:1px solid var(--border);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:bold;z-index:105;box-shadow:0 -2px 8px rgba(0,0,0,.06)}
-.total-usd{color:var(--text);font-size:1.2rem}.total-bs{color:var(--warn);font-size:.95rem;font-weight:600}
-#scanner-container{position:relative;width:100%;aspect-ratio:1;background:#1a202c;border-radius:10px;overflow:hidden}
-#scanner-video{width:100%;height:100%;object-fit:cover}.scanner-frame{position:absolute;top:15%;left:10%;right:10%;bottom:15%;border:3px solid var(--primary);border-radius:8px;pointer-events:none}
-.scanner-status{text-align:center;padding:10px;color:var(--muted);font-size:.9rem}
-.stock-pill{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:bold;white-space:nowrap}
-.pill-ok{background:var(--primary-light);color:var(--primary)}.pill-warn{background:var(--warn-light);color:#975a16}.pill-danger{background:var(--danger-light);color:var(--danger)}
-.product-card{border-left:5px solid var(--border)}.product-card.edge-ok{border-left-color:var(--primary)}.product-card.edge-warn{border-left-color:var(--warn)}.product-card.edge-danger{border-left-color:var(--danger)}
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(26,32,44,.7);display:none;align-items:center;justify-content:center;z-index:200;padding:16px;backdrop-filter:blur(4px)}.modal-overlay.active{display:flex}
-.modal-content{background:var(--card);border:1px solid var(--border);border-radius:12px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;padding:16px;box-shadow:0 10px 40px rgba(0,0,0,.2)}
-.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.modal-header h2{font-size:1.15rem;color:var(--accent)}
-.modal-close{background:none;border:none;color:var(--muted);font-size:2rem;line-height:1;cursor:pointer;padding:0 6px}
-.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);color:var(--text);padding:12px 20px;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.15);z-index:300;opacity:0;transition:opacity .3s;pointer-events:none;font-weight:600;max-width:90%;text-align:center}
-.toast.show{opacity:1}.toast.primary{border-color:var(--primary);color:var(--primary)}.toast.danger{border-color:var(--danger);color:var(--danger)}.toast.warn{border-color:var(--warn);color:#975a16}
-.flex-row{display:flex;gap:8px}.flex-row>*{flex:1}.muted{color:var(--muted)}.small{font-size:.85rem}.empty-msg{color:var(--muted);text-align:center;padding:30px 16px}.change-neg{color:var(--danger)}.change-pos{color:var(--primary)}.backup-card{border:1px dashed var(--accent);background:var(--accent-light)}.config-card{border:1px dashed var(--warn);background:var(--warn-light)}
-.rate-option{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;cursor:pointer;background:var(--card)}
-.rate-option.selected{border-color:var(--primary);background:var(--primary-light)}
-.rate-option input{width:20px;height:20px}
-.rate-display{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}.rate-display:last-child{border-bottom:none}
-.rate-display .label{color:var(--muted)}.rate-display .value{font-weight:bold}
-.currency-bs{color:var(--warn);font-weight:600}.currency-usd{color:var(--primary);font-weight:600}
-.margin-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin-top:8px}
-.margin-box .label{font-size:.8rem;color:var(--muted)}
-.margin-box .value{font-size:1rem;font-weight:bold;color:var(--primary)}
-.auto-calc{display:flex;align-items:center;gap:8px;padding:10px;background:var(--accent-light);border-radius:8px;margin-bottom:12px;border:1px solid var(--accent)}
-.auto-calc input{width:18px;height:18px}
-.auto-calc label{font-size:.88rem;color:var(--accent);cursor:pointer;font-weight:500}
-.section-title{font-size:.9rem;color:var(--accent);font-weight:600;margin:12px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--accent-light)}
-.calc-info{background:var(--primary-light);border:1px solid var(--primary);border-radius:8px;padding:10px;margin-top:8px;font-size:.85rem;color:var(--primary);font-weight:500}
-.pin-container{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:var(--bg);padding:20px}
-.pin-box{background:var(--card);border-radius:16px;padding:30px;box-shadow:0 10px 40px rgba(0,0,0,.1);width:100%;max-width:350px;text-align:center}
-.pin-box h2{color:var(--accent);margin-bottom:10px}
-.pin-box p{color:var(--muted);margin-bottom:20px;font-size:.9rem}
-.pin-dots{display:flex;justify-content:center;gap:12px;margin-bottom:20px}
-.pin-dot{width:16px;height:16px;border-radius:50%;background:var(--border);transition:all .2s}
-.pin-dot.filled{background:var(--accent);transform:scale(1.2)}
-.pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.pin-key{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;font-size:1.5rem;font-weight:bold;color:var(--text);cursor:pointer;transition:all .15s}
-.pin-key:active{background:var(--accent-light);transform:scale(.95)}
-.pin-key.delete{color:var(--danger)}
-.pin-error{color:var(--danger);font-size:.85rem;margin-top:10px;min-height:20px}
-.license-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);padding:20px;text-align:center;overflow-y:auto}
-.license-box{background:var(--card);border-radius:16px;padding:30px;box-shadow:0 10px 40px rgba(0,0,0,.1);width:100%;max-width:380px}
-.license-box h2{color:var(--danger);margin-bottom:12px;font-size:1.3rem}
-.license-box .icon{font-size:3rem;margin-bottom:12px}
-.license-box p{color:var(--muted);margin-bottom:16px;line-height:1.5}
-.license-box .btn{margin-top:8px}
-.license-status{font-size:.8rem;color:var(--muted);margin-top:12px}
-.id-display{background:var(--accent-light);border:2px solid var(--accent);border-radius:10px;padding:14px;margin:12px 0;text-align:center}
-.id-display .id-label{font-size:.8rem;color:var(--muted);margin-bottom:6px}
-.id-display .id-value{font-family:monospace;font-size:1.1rem;font-weight:bold;color:var(--accent);word-break:break-all;user-select:all}
-.id-display .id-hint{font-size:.75rem;color:var(--muted);margin-top:6px}
-.stock-warning{background:var(--danger-light);border:1px solid var(--danger);border-radius:6px;padding:8px;margin-top:8px;font-size:.8rem;color:var(--danger);font-weight:600}
-.pay-type-selector{display:flex;gap:8px;margin-bottom:16px}
-.pay-type-btn{flex:1;padding:14px;border:2px solid var(--border);border-radius:8px;background:var(--card);cursor:pointer;text-align:center;transition:all .15s}
-.pay-type-btn.active{border-color:var(--primary);background:var(--primary-light)}
-.pay-type-btn .icon{font-size:1.5rem;margin-bottom:4px}
-.pay-type-btn .label{font-size:.85rem;font-weight:600}
-.debt-card{border-left:5px solid var(--warn)}
-.debt-card.paid{border-left-color:var(--primary);opacity:.7}
-.debt-info{display:flex;justify-content:space-between;margin-bottom:8px}
-.debt-amount{font-size:1.3rem;font-weight:bold;color:var(--primary)}
-.debt-amount-bs{font-size:1rem;color:var(--warn);font-weight:600}
-.debt-client{font-weight:600;margin-bottom:4px}
-.debt-meta{font-size:.8rem;color:var(--muted)}
-.abono-item{background:var(--bg);border-radius:6px;padding:8px;margin-top:6px;font-size:.85rem}
-.tab-filter{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
-.tab-filter button{flex:1;min-width:100px}
-.danger-zone{border-top:2px solid var(--danger-light);margin-top:14px;padding-top:14px}
-.danger-zone-title{color:var(--danger);font-weight:700;font-size:.9rem;margin-bottom:8px}
-.boxes-label{font-size:.7rem;color:var(--muted);margin-top:4px;font-weight:600}
+/* --- NUEVA PALETA CORPORATIVA Y MINIMALISTA --- */
+:root {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --border: #e2e8f0;
+  --text: #0f172a;
+  --muted: #64748b;
+  
+  --primary: #059669; /* Verde esmeralda corporativo */
+  --primary-light: #d1fae5;
+  --primary-text: #047857;
+  
+  --accent: #2563eb; /* Azul tech */
+  --accent-light: #dbeafe;
+  --accent-text: #1d4ed8;
+  
+  --danger: #e11d48;
+  --danger-light: #ffe4e6;
+  --danger-text: #be123c;
+  
+  --warn: #d97706;
+  --warn-light: #fef3c7;
+  --warn-text: #b45309;
+  
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- HEADER --- */
+header {
+  position: fixed; top: 0; left: 0; right: 0; height: 60px;
+  background: rgba(255,255,255,0.9); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px; display: flex; justify-content: space-between; align-items: center;
+  z-index: 100;
+}
+header h1 { font-size: 1.1rem; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
+.badge { background: var(--danger); color: #fff; font-size: .7rem; padding: 4px 8px; border-radius: 6px; font-weight: 600; display: none; letter-spacing: 0.02em; }
+.badge.active { display: inline-block; }
+
+/* --- MAIN LAYOUT --- */
+main {
+  position: fixed; top: 60px; left: 0; right: 0; bottom: 0;
+  overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  padding: 20px 20px 180px 20px; z-index: 1;
+}
+.view { display: none; }
+.view.active { display: block; animation: fadeIn 0.2s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* --- CARDS --- */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease;
+}
+.card:active { box-shadow: var(--shadow-md); }
+
+/* --- BUTTONS --- */
+.btn {
+  background: var(--accent); color: #fff; border: none; border-radius: 8px;
+  padding: 12px 16px; font-size: 0.95rem; font-weight: 500; cursor: pointer;
+  min-height: 44px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all 0.15s ease; font-family: inherit; letter-spacing: 0.01em;
+}
+.btn:active { transform: scale(0.98); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-primary { background: var(--primary); }
+.btn-danger { background: var(--danger); }
+.btn-warn { background: var(--warn); color: #fff; }
+.btn-ghost { background: #fff; border: 1px solid var(--border); color: var(--text); box-shadow: var(--shadow-sm); }
+.btn-sm { padding: 10px 14px; font-size: 0.85rem; min-height: 38px; width: auto; }
+
+/* --- INPUTS --- */
+.input-group { margin-bottom: 16px; }
+.input-group label { display: block; color: var(--text); font-size: 0.85rem; margin-bottom: 6px; font-weight: 500; }
+.input {
+  width: 100%; background: #fff; border: 1px solid var(--border); color: var(--text);
+  padding: 12px 14px; border-radius: 8px; font-size: 1rem; min-height: 44px;
+  font-family: inherit; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+
+/* --- NAV BAR --- */
+nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #fff; border-top: 1px solid var(--border);
+  display: flex; justify-content: space-around; padding-bottom: var(--safe-bottom);
+  z-index: 110; box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.02);
+}
+.nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 10px 0; color: var(--muted); font-size: 0.7rem; cursor: pointer;
+  min-height: 60px; transition: all 0.2s; font-weight: 500;
+}
+.nav-item.active { color: var(--accent); font-weight: 600; }
+.nav-item span { font-size: 1.4rem; margin-bottom: 2px; filter: grayscale(100%) opacity(0.6); transition: all 0.2s; }
+.nav-item.active span { filter: grayscale(0%) opacity(1); transform: translateY(-2px); }
+
+/* --- CART & TOTAL BAR --- */
+.cart-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.cart-item:last-child { border-bottom: none; }
+.cart-controls { display: flex; align-items: center; gap: 8px; }
+.cart-controls button {
+  width: 36px; height: 36px; border-radius: 6px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text); font-size: 1.2rem; font-weight: 500;
+  transition: background 0.15s;
+}
+.cart-controls button:active { background: var(--border); }
+
+.total-bar {
+  position: fixed; bottom: 60px; left: 0; right: 0;
+  background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);
+  border-top: 1px solid var(--border);
+  padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;
+  gap: 12px; z-index: 105; box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.02);
+}
+.total-usd { color: var(--text); font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; }
+.total-bs { color: var(--muted); font-size: 0.85rem; font-weight: 500; }
+
+/* --- MODALS --- */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px);
+  display: none; align-items: flex-end; justify-content: center; z-index: 200;
+  padding: 0; transition: opacity 0.3s;
+}
+.modal-overlay.active { display: flex; }
+.modal-content {
+  background: var(--card); border-radius: 20px 20px 0 0;
+  width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;
+  padding: 24px 20px calc(24px + var(--safe-bottom)) 20px;
+  box-shadow: var(--shadow-lg); border: 1px solid var(--border); border-bottom: none;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-header h2 { font-size: 1.2rem; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+.modal-close { background: var(--bg); border: none; color: var(--muted); font-size: 1.5rem; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+/* --- ELEMENTOS ESPECÍFICOS --- */
+.stock-pill { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: .75rem; font-weight: 600; }
+.pill-ok { background: var(--primary-light); color: var(--primary-text); }
+.pill-warn { background: var(--warn-light); color: var(--warn-text); }
+.pill-danger { background: var(--danger-light); color: var(--danger-text); }
+
+.product-card { border-left: 4px solid var(--border); border-radius: 12px; }
+.product-card.edge-ok { border-left-color: var(--primary); }
+.product-card.edge-warn { border-left-color: var(--warn); }
+.product-card.edge-danger { border-left-color: var(--danger); }
+
+.scanner-frame { position: absolute; top: 15%; left: 10%; right: 10%; bottom: 15%; border: 2px solid var(--primary); border-radius: 16px; pointer-events: none; box-shadow: 0 0 0 4000px rgba(0,0,0,0.5); }
+
+.rate-option { display: flex; align-items: center; gap: 12px; padding: 14px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; cursor: pointer; background: #fff; transition: all 0.2s; }
+.rate-option.selected { border-color: var(--accent); background: var(--accent-light); }
+.rate-option input { width: 18px; height: 18px; accent-color: var(--accent); }
+
+.pay-type-selector { display: flex; gap: 12px; margin-bottom: 20px; }
+.pay-type-btn { flex: 1; padding: 16px; border: 1px solid var(--border); border-radius: 10px; background: #fff; cursor: pointer; text-align: center; transition: all 0.2s; }
+.pay-type-btn.active { border-color: var(--primary); background: var(--primary-light); }
+.pay-type-btn .icon { font-size: 1.5rem; margin-bottom: 6px; }
+.pay-type-btn .label { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+
+.section-title { font-size: 0.85rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin: 20px 0 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+
+/* --- TOASTS --- */
+.toast {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-20px);
+  background: var(--text); color: #fff; padding: 12px 24px; border-radius: 8px;
+  box-shadow: var(--shadow-lg); z-index: 300; opacity: 0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none; font-weight: 500; font-size: 0.9rem; max-width: 90%; text-align: center;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.primary { background: var(--primary); }
+.toast.danger { background: var(--danger); }
+.toast.warn { background: var(--warn); }
+
+/* --- OTROS --- */
+.flex-row { display: flex; gap: 10px; }
+.flex-row > * { flex: 1; }
+.muted { color: var(--muted); }
+.small { font-size: 0.85rem; }
+.empty-msg { color: var(--muted); text-align: center; padding: 40px 20px; font-size: 0.95rem; }
+.change-neg { color: var(--danger); }
+.change-pos { color: var(--primary); }
+.backup-card { border: 1px dashed var(--accent); background: var(--accent-light); }
+.config-card { border: 1px dashed var(--warn); background: var(--warn-light); }
+.currency-bs { color: var(--warn-text); font-weight: 600; }
+.currency-usd { color: var(--primary-text); font-weight: 600; }
+
+/* PIN & LICENSE PANTALLAS */
+.pin-container, .license-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: var(--bg); padding: 20px; }
+.pin-box, .license-box { background: #fff; border-radius: 20px; padding: 32px 24px; box-shadow: var(--shadow-lg); width: 100%; max-width: 360px; text-align: center; border: 1px solid var(--border); }
+.pin-box h2, .license-box h2 { font-weight: 700; color: var(--text); margin-bottom: 8px; letter-spacing: -0.02em; }
+.pin-box p, .license-box p { color: var(--muted); margin-bottom: 24px; font-size: 0.95rem; }
+.pin-dots { display: flex; justify-content: center; gap: 16px; margin-bottom: 32px; }
+.pin-dot { width: 16px; height: 16px; border-radius: 50%; background: var(--border); transition: all 0.2s; }
+.pin-dot.filled { background: var(--text); transform: scale(1.1); }
+.pin-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.pin-key { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; font-size: 1.5rem; font-weight: 600; color: var(--text); cursor: pointer; transition: all 0.15s; }
+.pin-key:active { background: var(--border); transform: scale(0.95); }
+.pin-key.delete { color: var(--danger); }
+.pin-error { color: var(--danger); font-size: 0.85rem; margin-top: 16px; min-height: 20px; }
+
+.id-display { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin: 16px 0; text-align: center; }
+.id-display .id-label { font-size: 0.8rem; color: var(--muted); margin-bottom: 8px; font-weight: 500; }
+.id-display .id-value { font-family: monospace; font-size: 1.1rem; font-weight: 700; color: var(--text); word-break: break-all; user-select: all; }
+.id-display .id-hint { font-size: 0.75rem; color: var(--muted); margin-top: 8px; }
+
+.stock-warning { background: var(--danger-light); border-radius: 8px; padding: 10px; margin-top: 10px; font-size: 0.8rem; color: var(--danger-text); font-weight: 500; }
+
+.debt-card { border-left: 4px solid var(--warn); }
+.debt-card.paid { border-left-color: var(--primary); opacity: 0.7; }
+.debt-info { display: flex; justify-content: space-between; margin-bottom: 12px; }
+.debt-amount { font-size: 1.3rem; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
+.debt-amount-bs { font-size: 1rem; color: var(--warn-text); font-weight: 600; }
+.debt-client { font-weight: 600; font-size: 1.05rem; margin-bottom: 4px; color: var(--text); }
+.debt-meta { font-size: 0.8rem; color: var(--muted); }
+.abono-item { background: var(--bg); border-radius: 8px; padding: 10px; margin-top: 8px; font-size: 0.85rem; border: 1px solid var(--border); }
+.tab-filter { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.tab-filter button { flex: 1; min-width: 100px; }
+
+.margin-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-top: 8px; }
+.margin-box .label { font-size: 0.8rem; color: var(--muted); margin-bottom: 4px; }
+.margin-box .value { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+.auto-calc { display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--accent-light); border-radius: 10px; margin-bottom: 16px; }
+.auto-calc input { width: 20px; height: 20px; accent-color: var(--accent); }
+.auto-calc label { font-size: 0.85rem; color: var(--accent-text); cursor: pointer; font-weight: 500; }
+.calc-info { background: var(--bg); border-radius: 8px; padding: 12px; margin-top: 8px; font-size: 0.85rem; color: var(--text); border: 1px solid var(--border); }
 </style>
 </head>
 <body>
 
 <div id="license-screen" class="license-screen" style="display:none">
   <div class="license-box">
-    <div class="icon">🔒</div>
+    <div style="font-size:3rem;margin-bottom:16px;">🔒</div>
     <h2>Licencia Requerida</h2>
     <p id="license-message">Este dispositivo necesita una licencia activa para funcionar.</p>
     <div class="id-display">
-      <div class="id-label">🆔 Tu ID de cliente (guárdalo):</div>
+      <div class="id-label">ID DE CLIENTE (GUÁRDALO)</div>
       <div class="id-value" id="license-client-id">—</div>
     </div>
     <button class="btn btn-primary" onclick="copyClientId()">📋 Copiar mi ID</button>
-    <button class="btn btn-warn" style="margin-top:8px" onclick="retryLicenseCheck()">🔄 Verificar de nuevo</button>
-    <button class="btn btn-ghost" style="margin-top:8px" onclick="showLicenseInfo()">ℹ️ Información</button>
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="retryLicenseCheck()">🔄 Verificar de nuevo</button>
   </div>
 </div>
 
 <div id="pin-screen" class="pin-container" style="display:none">
   <div class="pin-box">
-    <h2>🔐 Acceso Seguro</h2>
+    <h2>Acceso Seguro</h2>
     <p id="pin-message">Ingresa tu PIN de 4 dígitos</p>
     <div class="pin-dots" id="pin-dots">
       <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
@@ -148,7 +302,7 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
 </div>
 
 <div id="app-container" style="display:none">
-<header><h1 id="header-title">Punto de Venta</h1><span id="alert-badge" class="badge" onclick="showAlerts()" title="Ver productos en alerta">0</span></header>
+<header><h1 id="header-title">Punto de Venta</h1><span id="alert-badge" class="badge">0</span></header>
 <main>
   <div id="view-pos" class="view active">
     <div id="cart-container" class="card"></div>
@@ -156,7 +310,7 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
   </div>
   <div id="view-scan" class="view">
     <div id="scanner-container"><video id="scanner-video" playsinline muted></video><div class="scanner-frame"></div></div>
-    <div class="scanner-status" id="scanner-status">Cámara apagada.</div>
+    <div class="scanner-status" id="scanner-status" style="text-align:center;padding:12px;color:var(--muted);font-size:0.9rem;">Cámara apagada.</div>
     <div class="flex-row"><button class="btn btn-warn" id="btn-toggle-scan" onclick="toggleScanner()">▶️ Iniciar</button><button class="btn btn-danger" onclick="stopScanner()">⏹️ Detener</button></div>
     <div class="card" style="margin-top:16px">
       <p class="muted small" style="margin-bottom:8px">Si la cámara no funciona, escribe el código aquí:</p>
@@ -164,50 +318,40 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
     </div>
   </div>
   <div id="view-inventory" class="view">
-    <input type="text" id="inventory-search" class="input" placeholder="🔍 Buscar por nombre o código..." oninput="renderInventory()" style="margin-bottom:12px">
-    <div class="tab-filter" style="margin-bottom:12px">
-      <button class="btn btn-sm btn-primary" id="filter-all" onclick="setInventoryFilter('all')">📦 Todos</button>
-      <button class="btn btn-sm btn-ghost" id="filter-alerts" onclick="setInventoryFilter('alerts')">⚠️ Solo alertas</button>
-    </div>
-    <button class="btn btn-primary" style="margin-bottom:16px" onclick="openNewProductModal()">+ Nuevo Producto</button>
+    <input type="text" id="inventory-search" class="input" placeholder="🔍 Buscar por nombre o código..." oninput="renderInventory()" style="margin-bottom:16px">
+    <button class="btn btn-primary" style="margin-bottom:20px" onclick="openNewProductModal()">+ Nuevo Producto</button>
     <div id="inventory-list"></div>
     <div class="card backup-card" style="margin-top:20px">
-      <h3 style="margin-bottom:6px">🛡️ Respaldo de datos</h3>
-      <p class="muted small" style="margin-bottom:12px">Guarda una copia de tu inventario, ventas y tu ID de licencia. Hazlo cada semana.</p>
-      <div class="flex-row" style="margin-bottom:8px;"><button class="btn btn-primary btn-sm" onclick="exportBackup()">⬇️ Exportar JSON</button><button class="btn btn-warn btn-sm" onclick="document.getElementById('import-file').click()">⬆️ Importar JSON</button></div>
+      <h3 style="margin-bottom:8px;font-size:0.95rem;color:var(--accent-text)">🛡️ Respaldo de datos</h3>
+      <p class="muted small" style="margin-bottom:16px">Guarda una copia de tu inventario, ventas y tu ID de licencia. Hazlo cada semana.</p>
+      <div class="flex-row" style="margin-bottom:8px;"><button class="btn btn-primary btn-sm" onclick="exportBackup()">⬇️ Exportar JSON</button><button class="btn btn-ghost btn-sm" onclick="document.getElementById('import-file').click()">⬆️ Importar JSON</button></div>
       <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBackup(event)">
-      <button class="btn btn-sm btn-ghost" style="width:100%; border:1px solid var(--primary); color:var(--primary)" onclick="exportInventoryCSV()">📊 Descargar Inventario en Excel</button>
-      <div class="danger-zone">
-        <div class="danger-zone-title">⚠️ Zona de peligro</div>
-        <button class="btn btn-sm btn-danger" style="width:100%" onclick="clearSalesHistory()">🗑️ Limpiar historial de ventas y deudas pagadas</button>
-        <p class="muted small" style="margin-top:6px;font-size:.75rem">Borra las ventas del historial y las deudas ya cobradas. Las deudas pendientes en CxC se mantienen. ⚠️ Descarga el respaldo JSON antes de usar esta opción.</p>
-      </div>
+      <button class="btn btn-sm btn-ghost" style="width:100%; border:1px solid var(--primary); color:var(--primary-text)" onclick="exportInventoryCSV()">📊 Descargar Inventario en Excel</button>
     </div>
-    <div class="card config-card" style="margin-top:12px">
-      <h3 style="margin-bottom:6px">⚙️ Configuración</h3>
-      <div class="id-display">
-        <div class="id-label">🆔 Tu ID de cliente:</div>
+    <div class="card config-card" style="margin-top:16px">
+      <h3 style="margin-bottom:8px;font-size:0.95rem;color:var(--warn-text)">⚙️ Configuración</h3>
+      <div class="id-display" style="background:#fff;border-color:var(--warn)">
+        <div class="id-label">ID DE CLIENTE</div>
         <div class="id-value" id="app-client-id">—</div>
-        <div class="id-hint">Guárdalo. Si pierdes los datos, lo necesitarás.</div>
       </div>
-      <button class="btn btn-ghost btn-sm" style="width:100%;margin-bottom:12px" onclick="copyClientId()">📋 Copiar mi ID</button>
-      <div class="section-title">💱 Tasas del día</div>
+      <button class="btn btn-ghost btn-sm" style="width:100%;margin-bottom:16px" onclick="copyClientId()">📋 Copiar mi ID</button>
+      <div class="section-title">Tasas del día</div>
       <div class="input-group"><label>Tasa BCV (Bs por USD)</label><input type="number" id="rate-bcv" class="input" step="0.01" min="0" inputmode="decimal" placeholder="Ej: 36.50"></div>
       <div class="input-group"><label>Tasa Promedio (Bs por USD)</label><input type="number" id="rate-avg" class="input" step="0.01" min="0" inputmode="decimal" placeholder="Ej: 38.20"></div>
       <button class="btn btn-warn" onclick="saveRates()">💾 Guardar tasas</button>
-      <div class="section-title" style="margin-top:16px">🔐 Seguridad</div>
+      <div class="section-title" style="margin-top:20px">Seguridad</div>
       <button class="btn btn-ghost btn-sm" style="margin-bottom:8px" onclick="changePin()">Cambiar PIN de acceso</button>
-      <div class="license-status" id="license-status-text"></div>
+      <div class="license-status" id="license-status-text" style="font-size:0.75rem;color:var(--muted);margin-top:12px;text-align:center;"></div>
     </div>
   </div>
   <div id="view-sales" class="view">
     <div id="sales-summary" class="card"></div>
-    <button class="btn btn-sm btn-ghost" style="width:100%; margin-bottom:12px; border:1px solid var(--accent); color:var(--accent)" onclick="exportSalesCSV()">📊 Descargar Ventas en Excel</button>
+    <button class="btn btn-sm btn-ghost" style="width:100%; margin-bottom:16px; border:1px solid var(--accent); color:var(--accent-text)" onclick="exportSalesCSV()">📊 Descargar Ventas en Excel</button>
     <div id="sales-list"></div>
   </div>
   <div id="view-cxc" class="view">
     <div id="cxc-summary" class="card"></div>
-    <button class="btn btn-sm btn-ghost" style="width:100%; margin-bottom:12px; border:1px solid var(--warn); color:var(--warn)" onclick="exportCxC_CSV()">📊 Descargar Deudores en Excel</button>
+    <button class="btn btn-sm btn-ghost" style="width:100%; margin-bottom:16px; border:1px solid var(--warn); color:var(--warn-text)" onclick="exportCxC_CSV()">📊 Descargar Deudores en Excel</button>
     <div class="tab-filter">
       <button class="btn btn-sm btn-primary" onclick="renderCxC('pendientes')">⏳ Pendientes</button>
       <button class="btn btn-sm btn-ghost" onclick="renderCxC('pagados')">✅ Pagados</button>
@@ -234,12 +378,12 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
 <div id="checkout-modal" class="modal-overlay" onclick="if(event.target===this)closeModal('checkout-modal')">
   <div class="modal-content">
     <div class="modal-header"><h2>Cobrar</h2><button class="modal-close" onclick="closeModal('checkout-modal')">&times;</button></div>
-    <div class="card" style="text-align:center">
-      <p class="muted small">Total a pagar</p>
-      <p style="font-size:2rem;font-weight:bold" class="currency-usd">$<span id="checkout-total">0.00</span></p>
-      <p style="font-size:1.3rem;font-weight:bold" class="currency-bs">Bs <span id="checkout-total-bs">0.00</span></p>
+    <div class="card" style="text-align:center; background:var(--bg); border:none; box-shadow:none;">
+      <p class="muted small" style="margin-bottom:4px">Total a pagar</p>
+      <p style="font-size:2.2rem;font-weight:700;color:var(--text);letter-spacing:-0.03em;">$<span id="checkout-total">0.00</span></p>
+      <p style="font-size:1.1rem;font-weight:600;color:var(--warn-text)">Bs <span id="checkout-total-bs">0.00</span></p>
     </div>
-    <div class="section-title">💳 Tipo de pago</div>
+    <div class="section-title">Tipo de pago</div>
     <div class="pay-type-selector">
       <div class="pay-type-btn active" id="pay-contado" onclick="setPayType('contado')">
         <div class="icon">💵</div>
@@ -257,39 +401,51 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
         <div class="input-group"><label>Cédula</label><input type="text" id="cxc-cedula" class="input" placeholder="V-12345678"></div>
       </div>
     </div>
-    <div class="input-group">
-      <label>Seleccionar tasa para cobrar</label>
-      <div class="rate-option selected" onclick="selectRate('bcv')" id="rate-opt-bcv"><input type="radio" name="rate" value="bcv" checked><div style="flex:1"><strong>Tasa BCV</strong><div class="muted small" id="rate-bcv-display">0.00 Bs/$</div></div></div>
-      <div class="rate-option" onclick="selectRate('avg')" id="rate-opt-avg"><input type="radio" name="rate" value="avg"><div style="flex:1"><strong>Tasa Promedio</strong><div class="muted small" id="rate-avg-display">0.00 Bs/$</div></div></div>
+    <div class="section-title">Tasa de cambio</div>
+    <div class="rate-option selected" onclick="selectRate('bcv')" id="rate-opt-bcv">
+      <input type="radio" name="rate" value="bcv" checked>
+      <div style="flex:1">
+        <strong style="font-size:0.95rem">Tasa BCV</strong>
+        <div class="muted small" id="rate-bcv-display">0.00 Bs/$</div>
+      </div>
     </div>
-    <div class="input-group" id="cash-section">
+    <div class="rate-option" onclick="selectRate('avg')" id="rate-opt-avg">
+      <input type="radio" name="rate" value="avg">
+      <div style="flex:1">
+        <strong style="font-size:0.95rem">Tasa Promedio</strong>
+        <div class="muted small" id="rate-avg-display">0.00 Bs/$</div>
+      </div>
+    </div>
+    
+    <div class="input-group" id="cash-section" style="margin-top:20px">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
         <label id="cash-label" style="margin-bottom:0;">Efectivo recibido</label>
-        <div class="flex-row" style="width: 150px; margin-bottom: 0; gap: 4px;">
-          <button class="btn btn-sm btn-primary" id="pay-usd" onclick="setPayCurrency('USD')" style="padding: 4px 8px; min-height: 30px; font-size: 0.8rem;">USD $</button>
-          <button class="btn btn-sm btn-ghost" id="pay-bs" onclick="setPayCurrency('BS')" style="padding: 4px 8px; min-height: 30px; font-size: 0.8rem;">Bs</button>
+        <div class="flex-row" style="width: 140px; margin-bottom: 0; gap: 6px;">
+          <button class="btn btn-sm btn-primary" id="pay-usd" onclick="setPayCurrency('USD')" style="padding: 6px 8px; min-height: 32px; font-size: 0.75rem; border-radius:6px;">USD $</button>
+          <button class="btn btn-sm btn-ghost" id="pay-bs" onclick="setPayCurrency('BS')" style="padding: 6px 8px; min-height: 32px; font-size: 0.75rem; border-radius:6px;">Bs</button>
         </div>
       </div>
-      <input type="number" id="cash-received" class="input" placeholder="0.00" step="0.01" min="0" inputmode="decimal" oninput="calculateChange()" style="font-size:1.4rem;text-align:center">
+      <input type="number" id="cash-received" class="input" placeholder="0.00" step="0.01" min="0" inputmode="decimal" oninput="calculateChange()" style="font-size:1.6rem;text-align:center;font-weight:600;">
     </div>
-    <div class="card" style="text-align:center;font-size:1.2rem" id="change-section">
-      <div class="rate-display"><span class="label">Cambio en USD:</span><strong id="change-usd" class="change-pos">$0.00</strong></div>
-      <div class="rate-display"><span class="label">Cambio en Bs:</span><strong id="change-bs" class="change-pos currency-bs">Bs 0.00</strong></div>
+
+    <div class="card" style="text-align:center; background:var(--bg); border:none; padding:12px;" id="change-section">
+      <div style="display:flex;justify-content:space-between;padding:4px 0;"><span class="muted small">Cambio en USD:</span><strong id="change-usd" class="change-pos" style="font-size:1.05rem;">$0.00</strong></div>
+      <div style="display:flex;justify-content:space-between;padding:4px 0;"><span class="muted small">Cambio en Bs:</span><strong id="change-bs" class="change-pos currency-bs" style="font-size:1.05rem;">Bs 0.00</strong></div>
     </div>
-    <button class="btn btn-primary" id="btn-confirm-sale" onclick="processSale()" disabled>✅ Confirmar venta</button>
+    <button class="btn btn-primary" id="btn-confirm-sale" onclick="processSale()" disabled style="margin-top:16px;">✅ Confirmar venta</button>
   </div>
 </div>
 
 <div id="abono-modal" class="modal-overlay" onclick="if(event.target===this)closeModal('abono-modal')">
   <div class="modal-content">
     <div class="modal-header"><h2>Registrar Abono</h2><button class="modal-close" onclick="closeModal('abono-modal')">&times;</button></div>
-    <div class="card">
+    <div class="card" style="background:var(--bg);border:none;padding:12px;">
       <div class="debt-client" id="abono-cliente">—</div>
       <div class="debt-meta" id="abono-meta">—</div>
     </div>
-    <div class="card" style="text-align:center">
+    <div class="card" style="text-align:center; border:1px solid var(--border);">
       <div class="muted small">Saldo pendiente</div>
-      <div class="debt-amount">$<span id="abono-saldo-usd">0.00</span></div>
+      <div class="debt-amount" style="margin-top:4px;">$<span id="abono-saldo-usd">0.00</span></div>
       <div class="debt-amount-bs">Bs <span id="abono-saldo-bs">0.00</span> <span class="muted small">(tasa hoy: <span id="abono-tasa-hoy">0</span>)</span></div>
     </div>
     <div class="input-group">
@@ -301,18 +457,18 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
     </div>
     <div class="input-group">
       <label id="abono-cash-label">Monto del abono (USD)</label>
-      <input type="number" id="abono-monto" class="input" placeholder="0.00" step="0.01" min="0" inputmode="decimal" oninput="calcAbono()" style="font-size:1.4rem;text-align:center">
+      <input type="number" id="abono-monto" class="input" placeholder="0.00" step="0.01" min="0" inputmode="decimal" oninput="calcAbono()" style="font-size:1.4rem;text-align:center;font-weight:600;">
     </div>
     <div class="input-group">
       <label>Nota (opcional)</label>
       <input type="text" id="abono-nota" class="input" placeholder="Ej: Pago parcial">
     </div>
-    <div class="card" style="text-align:center">
+    <div class="card" style="text-align:center; background:var(--bg); border:none;">
       <div class="muted small">Nuevo saldo después del abono</div>
-      <div class="debt-amount">$<span id="abono-nuevo-saldo-usd">0.00</span></div>
+      <div class="debt-amount" style="margin-top:4px;">$<span id="abono-nuevo-saldo-usd">0.00</span></div>
       <div class="debt-amount-bs">Bs <span id="abono-nuevo-saldo-bs">0.00</span></div>
     </div>
-    <button class="btn btn-primary" id="btn-confirm-abono" onclick="confirmAbono()" disabled>✅ Registrar abono</button>
+    <button class="btn btn-primary" id="btn-confirm-abono" onclick="confirmAbono()" disabled style="margin-top:16px;">✅ Registrar abono</button>
   </div>
 </div>
 
@@ -330,17 +486,20 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
     <div class="input-group"><label>Código de barras</label><input type="text" id="prod-barcode" class="input" inputmode="numeric"></div>
     <div class="input-group"><label>Nombre del producto</label><input type="text" id="prod-name" class="input" placeholder="Ej: Pepsi 500ml"></div>
     <div class="input-group"><label>Categoría</label><input type="text" id="prod-category" class="input" placeholder="Ej: Refresco"></div>
-    <div class="auto-calc"><input type="checkbox" id="auto-calc-check" onchange="toggleAutoCalc()"><label for="auto-calc-check">✨ Calcular precios automáticamente desde costo + márgenes</label></div>
+    
+    <div class="auto-calc"><input type="checkbox" id="auto-calc-check" onchange="toggleAutoCalc()"><label for="auto-calc-check">✨ Calcular precios automáticamente</label></div>
+    
     <div id="cost-section" style="display:none">
       <div class="section-title">💰 Costo del proveedor</div>
       <div class="input-group">
         <label>💵 Costo de la caja/bulto (USD)</label>
         <input type="number" id="prod-cost-box" class="input" step="0.01" min="0" inputmode="decimal" placeholder="Ej: 7.20">
-        <p class="muted small" style="margin-top:4px">Lo que le pagaste al proveedor por la caja completa</p>
+        <p class="muted small" style="margin-top:6px">Lo que le pagaste al proveedor por la caja completa</p>
       </div>
       <div class="input-group"><label>Unidades por caja</label><input type="number" id="prod-units-per-box" class="input" min="1" value="12" inputmode="numeric"></div>
       <div class="calc-info" id="cost-unit-info">📊 Costo unitario calculado: <strong>$<span id="calc-cost-unit">0.00</span></strong> (caja ÷ unidades)</div>
-      <div class="section-title" style="margin-top:16px">📈 Márgenes de ganancia (% real sobre precio de venta)</div>
+      
+      <div class="section-title" style="margin-top:20px">📈 Márgenes de ganancia (% real sobre precio de venta)</div>
       <div class="flex-row">
         <div class="input-group"><label>Margen detall %</label><input type="number" id="prod-margin-det" class="input" step="1" min="0" max="99" inputmode="numeric" placeholder="30"></div>
         <div class="input-group"><label>Margen mayor %</label><input type="number" id="prod-margin-may" class="input" step="1" min="0" max="99" inputmode="numeric" placeholder="20"></div>
@@ -348,23 +507,25 @@ nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px
       <div class="margin-box"><div class="label">Precio calculado al detal (por unidad):</div><div class="value currency-usd">$<span id="calc-preview-det">0.00</span></div></div>
       <div class="margin-box" style="margin-top:8px"><div class="label">Precio calculado por caja completa:</div><div class="value currency-usd">$<span id="calc-preview-may">0.00</span></div></div>
     </div>
+    
     <div class="section-title">🏷️ Precios de venta</div>
     <div class="input-group"><label>Precio venta unidad (USD)</label><input type="number" id="prod-unit-price" class="input" step="0.01" min="0" inputmode="decimal"></div>
     <div class="input-group"><label>Precio venta caja (USD)</label><input type="number" id="prod-box-price" class="input" step="0.01" min="0" inputmode="decimal"></div>
+    
     <div class="section-title">📦 Inventario</div>
     <div class="flex-row">
       <div class="input-group"><label>Stock (unidades)</label><input type="number" id="prod-stock" class="input" min="0" value="0" inputmode="numeric"></div>
       <div class="input-group"><label>Avisar cuando baje de</label><input type="number" id="prod-min-stock" class="input" min="0" value="6" inputmode="numeric"></div>
     </div>
-    <button class="btn btn-primary" onclick="saveProduct()">💾 Guardar</button>
-    <button class="btn btn-danger" id="btn-delete-product" style="margin-top:8px;display:none" onclick="deleteProduct()">🗑️ Eliminar producto</button>
+    <button class="btn btn-primary" onclick="saveProduct()" style="margin-top:8px;">💾 Guardar</button>
+    <button class="btn btn-danger" id="btn-delete-product" style="margin-top:12px;display:none" onclick="deleteProduct()">🗑️ Eliminar producto</button>
   </div>
 </div>
 <div id="receive-modal" class="modal-overlay" onclick="if(event.target===this)closeModal('receive-modal')">
   <div class="modal-content">
     <div class="modal-header"><h2>Recibir mercancía</h2><button class="modal-close" onclick="closeModal('receive-modal')">&times;</button></div>
     <input type="hidden" id="recv-id">
-    <p id="recv-info" class="muted small" style="margin-bottom:14px"></p>
+    <p id="recv-info" class="muted small" style="margin-bottom:16px;font-weight:500;"></p>
     <div class="flex-row">
       <div class="input-group"><label>Cajas</label><input type="number" id="recv-boxes" class="input" min="0" value="0" inputmode="numeric"></div>
       <div class="input-group"><label>Unidades sueltas</label><input type="number" id="recv-loose" class="input" min="0" value="0" inputmode="numeric"></div>
@@ -394,10 +555,10 @@ function textoSeguro(t){return String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':
 function showToast(m,t){try{const el=document.getElementById('toast');if(el){el.textContent=m;el.className='toast show '+(t||'primary');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2200)}}catch(e){}}
 function openModal(id){try{const el=document.getElementById(id);if(el)el.classList.add('active')}catch(e){console.error('Error abriendo modal:',id,e)}}
 function closeModal(id){try{const el=document.getElementById(id);if(el)el.classList.remove('active')}catch(e){}}
+
 let cart=[],videoStream=null,isScanning=false,barcodeDetector=null,lastCode='',lastCodeTime=0,selectedRate='bcv',payCurrency='USD',payType='contado';
 let pinInput='',pinMode='login',newPin='';
 let abonoCxcId=null,abonoCurrency='USD';
-let inventoryFilter='all';
 
 function pinPress(key){
   const error=document.getElementById('pin-error');
@@ -449,10 +610,6 @@ function showLicenseScreen(message){
   document.getElementById('license-screen').style.display='flex';
   document.getElementById('license-client-id').textContent=getClientId();
   if(message)document.getElementById('license-message').textContent=message;
-}
-function showLicenseInfo(){
-  const id=getClientId();
-  alert('ID: '+id+'\n\nÚltima verificación: '+(localStorage.getItem(KEY_LICENSE+'_lastCheck')||'Nunca')+'\nEstado: '+(localStorage.getItem(KEY_LICENSE+'_status')||'Desconocido'));
 }
 async function retryLicenseCheck(){showToast('Verificando...','primary');await checkLicense(true)}
 async function checkLicense(force=false){
@@ -541,34 +698,12 @@ function updateLicenseStatusText(){
   if(el)el.textContent='Licencia: '+(status==='valid'?'✅ Activa hasta '+expire:status==='expired'?'⚠️ Vencida':'❓ Sin verificar');
 }
 function estadoStock(p){if(p.stock===0)return{pill:'pill-danger',edge:'edge-danger'};if(p.stock<=p.minStock)return{pill:'pill-warn',edge:'edge-warn'};return{pill:'pill-ok',edge:'edge-ok'}}
-
-function setInventoryFilter(f){
-  inventoryFilter=f;
-  renderInventory();
-}
-
-function showAlerts(){
-  inventoryFilter='alerts';
-  switchView('view-inventory');
-  showToast('Mostrando productos en alerta','warn');
-}
-
 function renderInventory(){
   try{
     const f=document.getElementById('inventory-search').value.toLowerCase().trim();
-    const btnAll=document.getElementById('filter-all');
-    const btnAl=document.getElementById('filter-alerts');
-    if(btnAll) btnAll.className='btn btn-sm '+(inventoryFilter==='all'?'btn-primary':'btn-ghost');
-    if(btnAl) btnAl.className='btn btn-sm '+(inventoryFilter==='alerts'?'btn-primary':'btn-ghost');
-    let prods=DB.getProducts().filter(p=>p.name.toLowerCase().includes(f)||String(p.barcode).includes(f)).sort((a,b)=>a.name.localeCompare(b.name));
-    if(inventoryFilter==='alerts'){prods=prods.filter(p=>p.stock<=p.minStock);}
+    const prods=DB.getProducts().filter(p=>p.name.toLowerCase().includes(f)||String(p.barcode).includes(f)).sort((a,b)=>a.name.localeCompare(b.name));
     const cont=document.getElementById('inventory-list');
-    if(prods.length===0){
-      const msg = inventoryFilter==='alerts' ? '✅ No hay productos en alerta. ¡Todo el inventario está bien!' : 'No hay productos. Toca "+ Nuevo Producto".';
-      cont.innerHTML='<div class="card"><p class="empty-msg">'+msg+'</p></div>';
-      updateAlertBadge();
-      return;
-    }
+    if(prods.length===0){cont.innerHTML='<div class="card"><p class="empty-msg">No hay productos. Toca "+ Nuevo Producto".</p></div>';updateAlertBadge();return}
     const rates=getRates();
     cont.innerHTML=prods.map(p=>{
       const est=estadoStock(p);
@@ -578,12 +713,9 @@ function renderInventory(){
       const precioBsAvg=dinero(p.unitPrice*rates.avg);
       const ganDet=p.unitPrice-(p.costPrice||0);
       const ganMay=(p.boxPrice/p.unitsPerBox)-(p.costPrice||0);
-      const margenTxt=p.costPrice?'<div style="margin-top:6px"><div class="small"><span style="color:var(--primary);font-weight:600">Detal:</span> costo $'+dinero(p.costPrice)+' + '+(p.marginDet||0)+'% = $'+dinero(p.unitPrice)+' (gan $'+dinero(ganDet)+')</div><div class="small"><span style="color:var(--accent);font-weight:600">Mayor:</span> caja $'+dinero(p.boxPrice)+' / '+p.unitsPerBox+'u + '+(p.marginMay||0)+'% = gan $'+dinero(ganMay)+'/u</div></div>':'';
+      const margenTxt=p.costPrice?'<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);"><div class="small" style="margin-bottom:2px;"><span style="color:var(--primary-text);font-weight:600">Detal:</span> costo $'+dinero(p.costPrice)+' + '+(p.marginDet||0)+'% = $'+dinero(p.unitPrice)+' <span class="muted">(gan $'+dinero(ganDet)+')</span></div><div class="small"><span style="color:var(--accent-text);font-weight:600">Mayor:</span> caja $'+dinero(p.boxPrice)+' / '+p.unitsPerBox+'u + '+(p.marginMay||0)+'% = <span class="muted">gan $'+dinero(ganMay)+'/u</span></div></div>':'';
       const stockWarning=!canSellBox&&p.unitsPerBox>1?'<div class="stock-warning">⚠️ Stock insuficiente para vender por caja (necesitas '+p.unitsPerBox+' u, tienes '+p.stock+' u)</div>':'';
-      const boxes = Math.floor(p.stock / p.unitsPerBox);
-      const remainder = p.stock % p.unitsPerBox;
-      const boxesLabel = p.unitsPerBox > 1 ? '📦 '+boxes+' caja'+(boxes!==1?'s':'')+(remainder>0?' + '+remainder+'u':'') : '';
-      return'<div class="card product-card '+est.edge+'"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><strong>'+textoSeguro(p.name)+'</strong><div class="muted small">'+textoSeguro(p.barcode)+' · '+textoSeguro(p.category||'Sin categoría')+'</div><div class="small" style="margin-top:4px">Unidad <strong class="currency-usd">$'+dinero(p.unitPrice)+'</strong> · <span class="currency-bs">Bs '+precioBsBCV+' (BCV)</span></div><div class="small muted">Caja <strong>$'+dinero(p.boxPrice)+'</strong> ('+p.unitsPerBox+' u) · <span class="currency-bs">Bs '+precioBsAvg+' (Prom)</span></div>'+margenTxt+stockWarning+'</div><div style="text-align:right;min-width:80px"><span class="stock-pill '+est.pill+'">'+p.stock+' u</span>'+(boxesLabel?'<div class="boxes-label">'+boxesLabel+'</div>':'')+'</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"><button class="btn btn-sm btn-primary" onclick="sellFromInventory(\''+p.id+'\',false)">🛒 Unidad</button>'+btnCaja+'<button class="btn btn-sm btn-warn" onclick="openReceiveStockModal(\''+p.id+'\')">📥 Recibir</button><button class="btn btn-sm btn-ghost" onclick="openEditProductModal(\''+p.id+'\')">✏️ Editar</button></div></div>'
+      return'<div class="card product-card '+est.edge+'"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><strong style="font-size:1rem;color:var(--text);">'+textoSeguro(p.name)+'</strong><div class="muted small" style="margin-top:2px;">'+textoSeguro(p.barcode)+' · '+textoSeguro(p.category||'Sin categoría')+'</div><div class="small" style="margin-top:6px;">Unidad <strong class="currency-usd" style="font-size:0.95rem;">$'+dinero(p.unitPrice)+'</strong> · <span class="currency-bs">Bs '+precioBsBCV+' (BCV)</span></div><div class="small muted">Caja <strong>$'+dinero(p.boxPrice)+'</strong> ('+p.unitsPerBox+' u) · <span class="currency-bs">Bs '+precioBsAvg+' (Prom)</span></div>'+margenTxt+stockWarning+'</div><span class="stock-pill '+est.pill+'">'+p.stock+' u</span></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;"><button class="btn btn-sm btn-primary" onclick="sellFromInventory(\''+p.id+'\',false)" style="flex:1;">🛒 Unidad</button>'+btnCaja+'<button class="btn btn-sm btn-ghost" onclick="openReceiveStockModal(\''+p.id+'\')" style="flex:1;">📥 Recibir</button><button class="btn btn-sm btn-ghost" onclick="openEditProductModal(\''+p.id+'\')" style="flex:1;">✏️ Editar</button></div></div>'
     }).join('');
     updateAlertBadge();
   }catch(e){console.error('Error en renderInventory:',e)}
@@ -691,12 +823,21 @@ function addToCart(pid,qty,asBox){
   const cant=Math.max(1,parseInt(qty,10)||1);
   const real=asBox?cant*p.unitsPerBox:cant;
   if(p.stock<=0){showToast('Sin stock: '+p.name,'danger');vibrar([80,40,80]);return false}
-  if(asBox&&p.stock<p.unitsPerBox){showToast('Stock insuficiente para 1 caja: necesitas '+p.unitsPerBox+' u, tienes '+p.stock+' u','danger');vibrar([80,40,80]);return false}
-  if(unidadesEnCarrito(pid)+real>p.stock){showToast('Stock insuficiente: quedan '+p.stock+' u','danger');vibrar([80,40,80]);return false}
+  if(asBox&&p.stock<p.unitsPerBox){
+    showToast('Stock insuficiente para 1 caja: necesitas '+p.unitsPerBox+' u, tienes '+p.stock+' u','danger');
+    vibrar([80,40,80]);
+    return false;
+  }
+  if(unidadesEnCarrito(pid)+real>p.stock){
+    showToast('Stock insuficiente: quedan '+p.stock+' u','danger');
+    vibrar([80,40,80]);
+    return false;
+  }
   const up=asBox?(p.boxPrice/p.unitsPerBox):p.unitPrice;
   const pl=asBox?p.boxPrice:p.unitPrice;
   const md=asBox?'box':'unit';
   const itemCost = asBox ? (p.costBox || (p.costPrice * p.unitsPerBox) || 0) : (p.costPrice || 0);
+  
   const ex=cart.find(l=>l.productId===pid&&l.mode===md);
   if(ex){ex.qty+=cant;ex.realQty+=real}else{cart.push({productId:p.id,name:p.name,qty:cant,realQty:real,unitPrice:up,displayPrice:pl,mode:md,unitsPerBox:p.unitsPerBox,cost:itemCost})}
   renderCart();
@@ -719,7 +860,7 @@ function renderCart(){
     const rates=getRates();
     const totalUSD=cartTotal();
     const totalBS=redondear(totalUSD*(rates[selectedRate]||rates.bcv||0));
-    cont.innerHTML=cart.map((l,i)=>'<div class="cart-item"><div style="flex:1;padding-right:8px"><div style="font-weight:600">'+textoSeguro(l.name)+'</div><div class="muted small">$'+dinero(l.displayPrice)+' × '+l.qty+' '+(l.mode==='box'?'caja(s)':'unidad(es)')+'</div><div class="small" style="color:var(--primary)">$'+dinero(l.qty*l.displayPrice)+' · descuenta '+l.realQty+' u</div></div><div class="cart-controls"><button onclick="updateCartQty('+i+',-1)">−</button><span style="min-width:26px;text-align:center;font-weight:bold">'+l.qty+'</span><button onclick="updateCartQty('+i+',1)">+</button></div></div>').join('');
+    cont.innerHTML=cart.map((l,i)=>'<div class="cart-item"><div style="flex:1;padding-right:12px"><div style="font-weight:600;font-size:0.95rem;">'+textoSeguro(l.name)+'</div><div class="muted small">$'+dinero(l.displayPrice)+' × '+l.qty+' '+(l.mode==='box'?'caja(s)':'unidad(es)')+'</div><div class="small" style="color:var(--primary-text);margin-top:2px;">$'+dinero(l.qty*l.displayPrice)+' · descuenta '+l.realQty+' u</div></div><div class="cart-controls"><button onclick="updateCartQty('+i+',-1)">−</button><span style="min-width:24px;text-align:center;font-weight:600;font-size:1rem;">'+l.qty+'</span><button onclick="updateCartQty('+i+',1)">+</button></div></div>').join('');
     document.getElementById('cart-total').textContent=dinero(totalUSD);
     document.getElementById('cart-total-bs').textContent=dinero(totalBS);
     if(btn)btn.disabled=false;
@@ -737,11 +878,13 @@ function setPayType(type){
     const cashSection=document.getElementById('cash-section');
     const changeSection=document.getElementById('change-section');
     const btnConfirm=document.getElementById('btn-confirm-sale');
+    
     if(btnContado)btnContado.classList.toggle('active',type==='contado');
     if(btnCredito)btnCredito.classList.toggle('active',type==='credito');
     if(creditoFields)creditoFields.style.display=type==='credito'?'block':'none';
     if(cashSection)cashSection.style.display=type==='contado'?'block':'none';
     if(changeSection)changeSection.style.display=type==='contado'?'block':'none';
+    
     if(type==='credito'){
       const cashReceived=document.getElementById('cash-received');
       const changeUsd=document.getElementById('change-usd');
@@ -792,6 +935,7 @@ function openCheckoutModal(){
     const rates=getRates();
     const totalUSD=cartTotal();
     const totalBS=redondear(totalUSD*(rates[selectedRate]||rates.bcv||0));
+    
     const elTotal=document.getElementById('checkout-total');
     const elTotalBs=document.getElementById('checkout-total-bs');
     const elRateBcv=document.getElementById('rate-bcv-display');
@@ -803,6 +947,7 @@ function openCheckoutModal(){
     const elTel=document.getElementById('cxc-telefono');
     const elCed=document.getElementById('cxc-cedula');
     const btnConfirm=document.getElementById('btn-confirm-sale');
+    
     if(elTotal)elTotal.textContent=dinero(totalUSD);
     if(elTotalBs)elTotalBs.textContent=dinero(totalBS);
     if(elRateBcv)elRateBcv.textContent=dinero(rates.bcv)+' Bs/$';
@@ -813,13 +958,18 @@ function openCheckoutModal(){
     if(elCliente)elCliente.value='';
     if(elTel)elTel.value='';
     if(elCed)elCed.value='';
+    
     payType='contado';payCurrency='USD';selectedRate='bcv';
     setPayType('contado');
     selectRate('bcv');
     setPayCurrency('USD');
     if(btnConfirm)btnConfirm.disabled=true;
+    
     openModal('checkout-modal');
-  }catch(e){console.error('Error en openCheckoutModal:',e);showToast('Error: '+e.message,'danger');}
+  }catch(e){
+    console.error('Error en openCheckoutModal:',e);
+    showToast('Error: '+e.message,'danger');
+  }
 }
 
 function calculateChange(){
@@ -848,6 +998,7 @@ function processSale(){
       items.push({productId:p.id,name:p.name,qty:ln.qty,mode:ln.mode,unitPriceAtSale:ln.unitPrice,displayPriceAtSale:ln.displayPrice,realQty:ln.realQty,costPriceAtSale:ln.cost || 0});
     }
     const venta={id:uid('s_'),date:new Date().toISOString(),totalUSD:totalUSD,totalBS:totalBS,rateUsed:rate,rateType:selectedRate,payType:payType,items:items};
+    
     if(payType==='contado'){
       const cashInput=parseFloat(document.getElementById('cash-received').value)||0;
       let cashUSD=0,cashBS=0;
@@ -866,7 +1017,11 @@ function processSale(){
       DB.addCxC(cxc);
       cart=[];renderCart();updateAlertBadge();closeModal('checkout-modal');showToast('Venta a crédito registrada: $'+dinero(totalUSD),'primary');vibrar(60);switchView('view-cxc');
     }
-  }catch(e){console.error('Error en processSale:',e);showToast('Error: '+e.message,'danger');vibrar([80,40,80]);}
+  }catch(e){
+    console.error('Error en processSale:',e);
+    showToast('Error: '+e.message,'danger');
+    vibrar([80,40,80]);
+  }
 }
 function renderSales(){
   try{
@@ -874,15 +1029,15 @@ function renderSales(){
     const hoy=new Date().toDateString();const vHoy=vts.filter(v=>new Date(v.date).toDateString()===hoy);
     const tHoy=vHoy.reduce((s,v)=>s+(v.totalUSD||0),0);const tHoyBs=vHoy.reduce((s,v)=>s+(v.totalBS||0),0);
     const ganHoy=vHoy.reduce((s,v)=>s+v.items.reduce((ss,i)=>ss+((i.displayPriceAtSale-(i.costPriceAtSale||0))*i.qty),0),0);
-    res.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><div><div class="muted small">Vendido hoy (USD)</div><div style="font-size:1.6rem;font-weight:bold;color:var(--primary)">$'+dinero(tHoy)+'</div><div class="small" style="color:var(--accent);margin-top:4px">Ganancia: $'+dinero(ganHoy)+'</div></div><div style="text-align:right"><div class="muted small">Vendido hoy (Bs)</div><div style="font-size:1.6rem;font-weight:bold" class="currency-bs">Bs '+dinero(tHoyBs)+'</div><div class="muted small" style="margin-top:4px">'+vHoy.length+' ventas</div></div></div>';
+    res.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><div><div class="muted small">Vendido hoy (USD)</div><div style="font-size:1.8rem;font-weight:700;color:var(--primary-text);letter-spacing:-0.02em;">$'+dinero(tHoy)+'</div><div class="small" style="color:var(--primary-text);margin-top:4px;font-weight:500;">Ganancia: $'+dinero(ganHoy)+'</div></div><div style="text-align:right"><div class="muted small">Vendido hoy (Bs)</div><div style="font-size:1.4rem;font-weight:700;color:var(--warn-text);letter-spacing:-0.02em;">Bs '+dinero(tHoyBs)+'</div><div class="muted small" style="margin-top:4px;">'+vHoy.length+' ventas</div></div></div>';
     if(vts.length===0){cont.innerHTML='<div class="card"><p class="empty-msg">Todavía no hay ventas.</p></div>';return}
     cont.innerHTML=vts.map(v=>{
       const f=new Date(v.date);const fecha=f.toLocaleDateString()+' '+f.toLocaleTimeString('es-VE',{hour:'2-digit',minute:'2-digit'});
-      const its=v.items.map(i=>'<div class="muted small">'+i.qty+' '+(i.mode==='box'?'caja':'und')+' · '+textoSeguro(i.name)+' — $'+dinero(i.qty*i.displayPriceAtSale)+' <span style="color:var(--primary);font-size:.75rem">(gan $'+dinero((i.displayPriceAtSale-(i.costPriceAtSale||0))*i.qty)+')</span></div>').join('');
+      const its=v.items.map(i=>'<div class="muted small" style="margin-bottom:2px;">'+i.qty+' '+(i.mode==='box'?'caja':'und')+' · '+textoSeguro(i.name)+' — $'+dinero(i.qty*i.displayPriceAtSale)+' <span style="color:var(--primary-text);font-size:.75rem;font-weight:500;">(gan $'+dinero((i.displayPriceAtSale-(i.costPriceAtSale||0))*i.qty)+')</span></div>').join('');
       const rateLabel=v.rateType==='bcv'?'BCV':'Prom';const gananciaTotal=v.items.reduce((s,i)=>s+((i.displayPriceAtSale-(i.costPriceAtSale||0))*i.qty),0);
-      const tipoPago=v.payType==='credito'?'<span style="color:var(--warn);font-weight:600">📒 CRÉDITO</span>':'Contado';
-      const clienteInfo=v.payType==='credito'&&v.cliente?'<div class="small muted">Cliente: '+textoSeguro(v.cliente)+'</div>':'';
-      return'<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><strong class="small">'+fecha+'</strong><strong style="color:var(--primary)">$'+dinero(v.totalUSD)+'</strong></div><div class="small muted" style="margin-bottom:6px">Tasa '+rateLabel+': '+dinero(v.rateUsed)+' Bs/$ · Total Bs: <span class="currency-bs">'+dinero(v.totalBS)+'</span> · '+tipoPago+'</div>'+clienteInfo+its+'<div class="small" style="color:var(--accent);font-weight:600;margin-top:6px">💰 Ganancia: $'+dinero(gananciaTotal)+'</div><div class="muted small" style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px">Efectivo $'+dinero(v.cashUSD||0)+' / Bs '+dinero(v.cashBS||0)+' · Cambio $'+dinero(v.changeUSD||0)+' / Bs '+dinero(v.changeBS||0)+'</div></div>';
+      const tipoPago=v.payType==='credito'?'<span style="color:var(--warn-text);font-weight:600;background:var(--warn-light);padding:2px 6px;border-radius:4px;font-size:0.75rem;">CRÉDITO</span>':'<span style="color:var(--primary-text);font-weight:600;background:var(--primary-light);padding:2px 6px;border-radius:4px;font-size:0.75rem;">CONTADO</span>';
+      const clienteInfo=v.payType==='credito'&&v.cliente?'<div class="small muted" style="margin-bottom:4px;">Cliente: '+textoSeguro(v.cliente)+'</div>':'';
+      return'<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:8px;align-items:center;"><strong class="small" style="color:var(--muted);font-weight:500;">'+fecha+'</strong><strong style="color:var(--text);font-size:1.1rem;">$'+dinero(v.totalUSD)+'</strong></div><div class="small muted" style="margin-bottom:8px;display:flex;align-items:center;gap:8px;">Tasa '+rateLabel+': '+dinero(v.rateUsed)+' Bs/$ · Bs <span class="currency-bs">'+dinero(v.totalBS)+'</span> '+tipoPago+'</div>'+clienteInfo+its+'<div class="small" style="color:var(--primary-text);font-weight:600;margin-top:8px;">Ganancia: $'+dinero(gananciaTotal)+'</div><div class="muted small" style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;">Efectivo $'+dinero(v.cashUSD||0)+' / Bs '+dinero(v.cashBS||0)+' · Cambio $'+dinero(v.changeUSD||0)+' / Bs '+dinero(v.changeBS||0)+'</div></div>';
     }).join('');
   }catch(e){console.error('Error en renderSales:',e)}
 }
@@ -894,20 +1049,24 @@ function renderCxC(filter='pendientes'){
     const tasaHoy=rates[selectedRate]||rates.bcv||0;
     const summary=document.getElementById('cxc-summary');
     const cont=document.getElementById('cxc-list');
+    
     const pendientes=cxc.filter(c=>c.estado==='pendiente');
     const pagados=cxc.filter(c=>c.estado==='pagado');
     const totalPendienteUSD=pendientes.reduce((s,c)=>s+c.saldoUSD,0);
     const totalPendienteBS=redondear(totalPendienteUSD*tasaHoy);
-    summary.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><div><div class="muted small">Total por cobrar</div><div style="font-size:1.6rem;font-weight:bold;color:var(--warn)">$'+dinero(totalPendienteUSD)+'</div><div class="small currency-bs">Bs '+dinero(totalPendienteBS)+' (tasa hoy: '+dinero(tasaHoy)+')</div></div><div style="text-align:right"><div class="muted small">Deudores activos</div><div style="font-size:1.6rem;font-weight:bold">'+pendientes.length+'</div><div class="muted small" style="margin-top:4px">'+pagados.length+' pagados</div></div></div>';
+    
+    summary.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><div><div class="muted small">Total por cobrar</div><div style="font-size:1.8rem;font-weight:700;color:var(--warn-text);letter-spacing:-0.02em;">$'+dinero(totalPendienteUSD)+'</div><div class="small currency-bs" style="margin-top:4px;">Bs '+dinero(totalPendienteBS)+' (tasa hoy: '+dinero(tasaHoy)+')</div></div><div style="text-align:right"><div class="muted small">Deudores activos</div><div style="font-size:1.8rem;font-weight:700;color:var(--text);">'+pendientes.length+'</div><div class="muted small" style="margin-top:4px;">'+pagados.length+' pagados</div></div></div>';
+    
     let lista=filter==='pendientes'?pendientes:filter==='pagados'?pagados:cxc;
     if(lista.length===0){cont.innerHTML='<div class="card"><p class="empty-msg">No hay registros '+(filter==='pendientes'?'pendientes':filter==='pagados'?'pagados':'')+'.</p></div>';return}
+    
     cont.innerHTML=lista.map(c=>{
       const saldoBs=redondear(c.saldoUSD*tasaHoy);
       const f=new Date(c.fechaVenta);
       const fecha=f.toLocaleDateString();
       const esPagado=c.estado==='pagado';
       const abonosHtml=c.abonos&&c.abonos.length>0?c.abonos.map(a=>'<div class="abono-item"><strong>'+new Date(a.fecha).toLocaleDateString()+'</strong> · $'+dinero(a.montoUSD)+' (Bs '+dinero(a.montoBs)+' a tasa '+dinero(a.tasa)+')'+(a.nota?' · '+textoSeguro(a.nota):'')+'</div>').join(''):'';
-      return'<div class="card debt-card '+(esPagado?'paid':'')+'"><div class="debt-info"><div><div class="debt-client">'+textoSeguro(c.cliente)+'</div><div class="debt-meta">'+fecha+' · '+(c.telefono||'sin tel')+' · '+(c.cedula||'sin cédula')+'</div></div><div style="text-align:right"><div class="debt-amount">$'+dinero(c.saldoUSD)+'</div><div class="debt-amount-bs">Bs '+dinero(saldoBs)+'</div></div></div><div class="small muted" style="margin:8px 0">Original: $'+dinero(c.totalUSD)+' a tasa '+dinero(c.tasaVenta)+' · Pagado: $'+dinero(c.pagadoUSD)+'</div>'+(esPagado?'<div class="small" style="color:var(--primary);font-weight:600">✅ PAGADO</div>':'<button class="btn btn-sm btn-primary" onclick="openAbonoModal(\''+c.id+'\')">💰 Registrar abono</button>')+'<button class="btn btn-sm btn-ghost" style="margin-top:6px" onclick="showCxcDetail(\''+c.id+'\')">📋 Ver detalles</button>'+(abonosHtml?'<div style="margin-top:10px"><div class="small muted" style="margin-bottom:4px">Historial de abonos:</div>'+abonosHtml+'</div>':'')+'</div>';
+      return'<div class="card debt-card '+(esPagado?'paid':'')+'"><div class="debt-info"><div><div class="debt-client">'+textoSeguro(c.cliente)+'</div><div class="debt-meta" style="margin-top:4px;">'+fecha+' · '+(c.telefono||'sin tel')+' · '+(c.cedula||'sin cédula')+'</div></div><div style="text-align:right"><div class="debt-amount">$'+dinero(c.saldoUSD)+'</div><div class="debt-amount-bs">Bs '+dinero(saldoBs)+'</div></div></div><div class="small muted" style="margin:12px 0;padding:8px;background:var(--bg);border-radius:6px;">Original: $'+dinero(c.totalUSD)+' a tasa '+dinero(c.tasaVenta)+' · Pagado: $'+dinero(c.pagadoUSD)+'</div>'+(esPagado?'<div class="small" style="color:var(--primary-text);font-weight:600;text-align:center;padding:8px;background:var(--primary-light);border-radius:6px;">✅ PAGADO</div>':'<button class="btn btn-sm btn-primary" onclick="openAbonoModal(\''+c.id+'\')" style="width:100%;">💰 Registrar abono</button>')+'<button class="btn btn-sm btn-ghost" style="margin-top:8px;width:100%;" onclick="showCxcDetail(\''+c.id+'\')">📋 Ver detalles</button>'+(abonosHtml?'<div style="margin-top:12px;"><div class="small muted" style="margin-bottom:6px;font-weight:500;">Historial de abonos:</div>'+abonosHtml+'</div>':'')+'</div>';
     }).join('');
   }catch(e){console.error('Error en renderCxC:',e)}
 }
@@ -995,7 +1154,7 @@ function showCxcDetail(id){
     const tasaHoy=rates[selectedRate]||rates.bcv||0;
     const saldoBs=redondear(c.saldoUSD*tasaHoy);
     const abonosHtml=(c.abonos||[]).map(a=>'<div class="abono-item"><strong>'+new Date(a.fecha).toLocaleDateString()+' '+new Date(a.fecha).toLocaleTimeString('es-VE',{hour:'2-digit',minute:'2-digit'})+'</strong><br>$'+dinero(a.montoUSD)+' (Bs '+dinero(a.montoBs)+' a tasa '+dinero(a.tasa)+')'+(a.nota?'<br><em>'+textoSeguro(a.nota)+'</em>':'')+'</div>').join('');
-    document.getElementById('cxc-detail-content').innerHTML='<div class="card"><div class="debt-client" style="font-size:1.2rem">'+textoSeguro(c.cliente)+'</div><div class="debt-meta">'+(c.cedula||'')+' · '+(c.telefono||'')+'</div></div><div class="card" style="text-align:center"><div class="muted small">Saldo actual</div><div class="debt-amount">$'+dinero(c.saldoUSD)+'</div><div class="debt-amount-bs">Bs '+dinero(saldoBs)+' (tasa hoy: '+dinero(tasaHoy)+')</div><div class="small muted" style="margin-top:8px">Estado: '+(c.estado==='pagado'?'✅ Pagado':'⏳ Pendiente')+'</div></div><div class="card"><div class="small muted" style="margin-bottom:8px">📋 Información de la venta</div><div class="small">Fecha: '+new Date(c.fechaVenta).toLocaleString()+'</div><div class="small">Total original: $'+dinero(c.totalUSD)+' a tasa '+dinero(c.tasaVenta)+'</div><div class="small">Total en Bs original: Bs '+dinero(redondear(c.totalUSD*c.tasaVenta))+'</div><div class="small">Pagado: $'+dinero(c.pagadoUSD)+'</div></div>'+(abonosHtml?'<div class="card"><div class="small muted" style="margin-bottom:8px">💰 Historial de abonos</div>'+abonosHtml+'</div>':'<div class="card"><p class="empty-msg">Sin abonos registrados</p></div>');
+    document.getElementById('cxc-detail-content').innerHTML='<div class="card" style="background:var(--bg);border:none;padding:16px;"><div class="debt-client" style="font-size:1.2rem;">'+textoSeguro(c.cliente)+'</div><div class="debt-meta">'+(c.cedula||'')+' · '+(c.telefono||'')+'</div></div><div class="card" style="text-align:center;border:1px solid var(--border);"><div class="muted small">Saldo actual</div><div class="debt-amount" style="margin-top:4px;">$'+dinero(c.saldoUSD)+'</div><div class="debt-amount-bs">Bs '+dinero(saldoBs)+' <span class="muted small">(tasa hoy: '+dinero(tasaHoy)+')</span></div><div class="small muted" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">Estado: '+(c.estado==='pagado'?'<span style="color:var(--primary-text);font-weight:600;">✅ Pagado</span>':'<span style="color:var(--warn-text);font-weight:600;">⏳ Pendiente</span>')+'</div></div><div class="card" style="border:1px solid var(--border);"><div class="section-title" style="margin-top:0;">Información de la venta</div><div class="small" style="margin-bottom:4px;">Fecha: '+new Date(c.fechaVenta).toLocaleString()+'</div><div class="small" style="margin-bottom:4px;">Total original: $'+dinero(c.totalUSD)+' a tasa '+dinero(c.tasaVenta)+'</div><div class="small" style="margin-bottom:4px;">Total en Bs original: Bs '+dinero(redondear(c.totalUSD*c.tasaVenta))+'</div><div class="small">Pagado: $'+dinero(c.pagadoUSD)+'</div></div>'+(abonosHtml?'<div class="card" style="border:1px solid var(--border);"><div class="section-title" style="margin-top:0;">Historial de abonos</div>'+abonosHtml+'</div>':'<div class="card" style="border:1px solid var(--border);"><p class="empty-msg" style="padding:20px;">Sin abonos registrados</p></div>');
     openModal('cxc-detail-modal');
   }catch(e){console.error('Error en showCxcDetail:',e)}
 }
@@ -1011,7 +1170,7 @@ function handleManualScan(){const inp=document.getElementById('manual-barcode');
 
 function descargarCSV(nombreArchivo, filas) {
   try {
-    let csvContent = "\uFEFF";
+    let csvContent = "\uFEFF"; 
     filas.forEach(fila => {
       const filaEscapada = fila.map(celda => {
         let texto = String(celda == null ? '' : celda);
@@ -1019,6 +1178,7 @@ function descargarCSV(nombreArchivo, filas) {
       }).join(",");
       csvContent += filaEscapada + "\r\n";
     });
+    
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -1038,111 +1198,76 @@ function descargarCSV(nombreArchivo, filas) {
 function exportInventoryCSV() {
   const prods = DB.getProducts();
   if (prods.length === 0) { showToast('No hay productos', 'warn'); return; }
-  const filas = [["Código", "Nombre", "Categoría", "Precio Unidad (USD)", "Precio Caja (USD)", "Stock (Unidades)", "Stock Mínimo", "Costo Unitario (USD)"]];
+  
+  const filas = [
+    ["Código", "Nombre", "Categoría", "Precio Unidad (USD)", "Precio Caja (USD)", "Stock (Unidades)", "Stock Mínimo", "Costo Unitario (USD)"]
+  ];
+  
   prods.forEach(p => {
-    filas.push([p.barcode, p.name, p.category || '', dinero(p.unitPrice), dinero(p.boxPrice), p.stock, p.minStock, dinero(p.costPrice || 0)]);
+    filas.push([
+      p.barcode, p.name, p.category || '', 
+      dinero(p.unitPrice), dinero(p.boxPrice), 
+      p.stock, p.minStock, dinero(p.costPrice || 0)
+    ]);
   });
+  
   descargarCSV("Inventario", filas);
 }
 
 function exportSalesCSV() {
   const ventas = DB.getSales();
   if (ventas.length === 0) { showToast('No hay ventas registradas', 'warn'); return; }
-  const filas = [["Fecha", "Hora", "Total USD", "Total Bs", "Tasa BCV/Prom", "Tipo de Pago", "Cliente", "Ganancia Estimada (USD)"]];
+  
+  const filas = [
+    ["Fecha", "Hora", "Total USD", "Total Bs", "Tasa BCV/Prom", "Tipo de Pago", "Cliente", "Ganancia Estimada (USD)"]
+  ];
+  
   ventas.forEach(v => {
     const f = new Date(v.date);
     const fecha = f.toLocaleDateString();
     const hora = f.toLocaleTimeString('es-VE', {hour:'2-digit',minute:'2-digit'});
     const ganancia = v.items.reduce((s,i) => s + ((i.displayPriceAtSale - (i.costPriceAtSale||0)) * i.qty), 0);
     const tipoPago = v.payType === 'credito' ? 'Crédito' : 'Contado';
-    filas.push([fecha, hora, dinero(v.totalUSD), dinero(v.totalBS), dinero(v.rateUsed), tipoPago, v.cliente || '', dinero(ganancia)]);
+    
+    filas.push([
+      fecha, hora, dinero(v.totalUSD), dinero(v.totalBS), 
+      dinero(v.rateUsed), tipoPago, v.cliente || '', dinero(ganancia)
+    ]);
   });
+  
   descargarCSV("Ventas", filas);
 }
 
 function exportCxC_CSV() {
   const cxc = DB.getCxC();
   if (cxc.length === 0) { showToast('No hay cuentas por cobrar', 'warn'); return; }
+  
   const rates = getRates();
   const tasaHoy = rates.bcv || 0;
-  const filas = [["Cliente", "Cédula", "Teléfono", "Fecha Venta", "Total Original (USD)", "Total Pagado (USD)", "Saldo Pendiente (USD)", "Saldo en Bs (Hoy)", "Estado"]];
+  const filas = [
+    ["Cliente", "Cédula", "Teléfono", "Fecha Venta", "Total Original (USD)", "Total Pagado (USD)", "Saldo Pendiente (USD)", "Saldo en Bs (Hoy)", "Estado"]
+  ];
+  
   cxc.forEach(c => {
     const f = new Date(c.fechaVenta).toLocaleDateString();
     const saldoBs = redondear(c.saldoUSD * tasaHoy);
-    filas.push([c.cliente, c.cedula || '', c.telefono || '', f, dinero(c.totalUSD), dinero(c.pagadoUSD), dinero(c.saldoUSD), dinero(saldoBs), c.estado === 'pagado' ? 'Pagado' : 'Pendiente']);
+    filas.push([
+      c.cliente, c.cedula || '', c.telefono || '', f,
+      dinero(c.totalUSD), dinero(c.pagadoUSD), dinero(c.saldoUSD), 
+      dinero(saldoBs), c.estado === 'pagado' ? 'Pagado' : 'Pendiente'
+    ]);
   });
+  
   descargarCSV("CuentasPorCobrar", filas);
 }
 
-function exportBackup(){try{const data={app:'pos-pro',version:13,exportDate:new Date().toISOString(),clientId:getClientId(),products:DB.getProducts(),sales:DB.getSales(),cxc:DB.getCxC(),rates:getRates(),pin:localStorage.getItem(KEY_PIN)||null};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='respaldo_pos_'+getClientId()+'_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('Respaldo descargado (con CxC)','primary');vibrar(60)}catch(e){showToast('Error: '+e.message,'danger')}}
-
-function importBackup(ev){
-  const file=ev.target.files&&ev.target.files[0];
-  if(!file)return;
-  if(!confirm('Esto REEMPLAZA inventario, ventas, CxC, tasas e ID. ¿Continuar?')){ev.target.value='';return}
-  const reader=new FileReader();
-  reader.onload=e=>{
-    try{
-      const data=JSON.parse(e.target.result);
-      if(!data||!Array.isArray(data.products))throw new Error('Archivo inválido');
-      localStorage.setItem(KEY_PRODUCTS,JSON.stringify(data.products));
-      localStorage.setItem(KEY_SALES,JSON.stringify(Array.isArray(data.sales)?data.sales:[]));
-      if(Array.isArray(data.cxc))localStorage.setItem(KEY_CXC,JSON.stringify(data.cxc));
-      if(data.rates)saveRatesToStorage(data.rates);
-      if(data.clientId)localStorage.setItem(KEY_CLIENT_ID,data.clientId);
-      if(data.pin)localStorage.setItem(KEY_PIN,data.pin);
-      cart=[];
-      showToast('Datos restaurados','primary');
-      vibrar([60,40,60]);
-      setTimeout(()=>location.reload(),900);
-    }catch(err){
-      showToast('Error: '+err.message,'danger');
-      vibrar([80,40,80]);
-    }
-  };
-  reader.onerror=()=>showToast('No se pudo leer','danger');
-  reader.readAsText(file);
-  ev.target.value='';
-}
-
-function clearSalesHistory(){
-  const ventas=DB.getSales();
-  const cxc=DB.getCxC();
-  const pagadas=cxc.filter(c=>c.estado==='pagado');
-  if(ventas.length===0 && pagadas.length===0){showToast('No hay historial para limpiar','warn');return}
-  const msg='⚠️ ATENCIÓN ⚠️\n\nSe van a eliminar:\n• '+ventas.length+' ventas del historial\n• '+pagadas.length+' deudas ya cobradas\n\nSe MANTIENEN:\n• Inventario de productos\n• Deudas pendientes en CxC\n• Tasas y configuración\n\n¿Ya descargaste tu respaldo JSON?\n\nPresiona OK para continuar o Cancelar para abortar.';
-  if(!confirm(msg)){return}
-  if(!confirm('🔴 ÚLTIMA CONFIRMACIÓN 🔴\n\n¿Estás SEGURO? Esta acción NO se puede deshacer sin un respaldo.')){return}
-  DB.saveSales([]);
-  const cxcNuevas=cxc.filter(c=>c.estado!=='pagado');
-  DB.saveCxC(cxcNuevas);
-  showToast('Historial limpiado correctamente','primary');
-  vibrar([60,40,60]);
-  renderSales();
-  renderCxC('pendientes');
-  switchView('view-inventory');
-}
-
+function exportBackup(){try{const data={app:'pos-pro',version:12,exportDate:new Date().toISOString(),clientId:getClientId(),products:DB.getProducts(),sales:DB.getSales(),cxc:DB.getCxC(),rates:getRates(),pin:localStorage.getItem(KEY_PIN)||null};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='respaldo_pos_'+getClientId()+'_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('Respaldo descargado (con CxC)','primary');vibrar(60)}catch(e){showToast('Error: '+e.message,'danger')}}
+function importBackup(ev){const file=ev.target.files&&ev.target.files[0];if(!file)return;if(!confirm('Esto REEMPLAZA inventario, ventas, CxC, tasas e ID. ¿Continuar?')){ev.target.value='';return}const reader=new FileReader();reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(!data||!Array.isArray(data.products))throw new Error('Archivo inválido');localStorage.setItem(KEY_PRODUCTS,JSON.stringify(data.products));localStorage.setItem(KEY_SALES,JSON.stringify(Array.isArray(data.sales)?data.sales:[]));if(Array.isArray(data.cxc))localStorage.setItem(KEY_CXC,JSON.stringify(data.cxc));if(data.rates)saveRatesToStorage(data.rates);if(data.clientId)localStorage.setItem(KEY_CLIENT_ID,data.clientId);if(data.pin)localStorage.setItem(KEY_PIN,data.pin);cart=[];showToast('Datos restaurados','primary');vibrar([60,40,60]);setTimeout(()=>location.reload(),900)}catch(err){showToast('Error: '+err.message,'danger');vibrar([80,40,80])}};reader.onerror=()=>showToast('No se pudo leer','danger');reader.readAsText(file);ev.target.value=''}
 document.getElementById('prod-cost-box').addEventListener('input',updateCalcPreview);
 document.getElementById('prod-units-per-box').addEventListener('input',updateCalcPreview);
 document.getElementById('prod-margin-det').addEventListener('input',updateCalcPreview);
 document.getElementById('prod-margin-may').addEventListener('input',updateCalcPreview);
-
-function init(){
-  try{
-    seedData();
-    initDetector();
-    renderCart();
-    renderInventory();
-    renderSales();
-    updateAlertBadge();
-    updateLicenseStatusText();
-    document.getElementById('app-client-id').textContent=getClientId();
-    document.getElementById('manual-barcode').addEventListener('keydown',e=>{if(e.key==='Enter')handleManualScan()});
-    document.addEventListener('visibilitychange',()=>{if(document.hidden)stopScanner(true)});
-  }catch(e){alert('Error: '+e.message)}
-}
-
+function init(){try{seedData();initDetector();renderCart();renderInventory();renderSales();updateAlertBadge();updateLicenseStatusText();document.getElementById('app-client-id').textContent=getClientId();document.getElementById('manual-barcode').addEventListener('keydown',e=>{if(e.key==='Enter')handleManualScan()});document.addEventListener('visibilitychange',()=>{if(document.hidden)stopScanner(true)})}catch(e){alert('Error: '+e.message)}}
 (async function boot(){try{await checkLicense(false)}catch(e){showPinOrApp()}})();
 </script>
 <script>
